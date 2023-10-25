@@ -1,6 +1,9 @@
+import UDP.UDPListener;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        UDPListener listener = new UDPListener();
+        listener.start();
     }
 
 }
