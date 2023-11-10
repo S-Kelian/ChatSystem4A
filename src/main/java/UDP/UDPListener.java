@@ -1,7 +1,8 @@
 package UDP;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 
 public class UDPListener {
     Thread thread;
@@ -20,6 +21,7 @@ public class UDPListener {
                 byte[] bufferRecv = new byte[1024];
                 DatagramPacket packet = new DatagramPacket(bufferRecv, bufferRecv.length);
                 while (running) {
+                    socket.setBroadcast(true);
                     socket.receive(packet);
                     String message = new String(packet.getData(), 0, packet.getLength());
                     log("Greetings "+message+" !!!");
