@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 
 public class UDPListener {
     Thread thread;
+    static int port = 49000;
 
     public static void log(Object o) {
         Thread thread = Thread.currentThread();
@@ -16,7 +17,6 @@ public class UDPListener {
         @Override
         public void run() {
             boolean running = true;
-            int port = 1789;
             try (DatagramSocket socket = new DatagramSocket(port)) {
                 byte[] bufferRecv = new byte[1024];
                 DatagramPacket packet = new DatagramPacket(bufferRecv, bufferRecv.length);

@@ -1,4 +1,7 @@
-package main.java.objects;
+package objects;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import UDP.UDPListener;
@@ -12,9 +15,9 @@ public class SystemApp {
     private UDPSender udpUnicast;
     private UDPSender udpBroadcast;
 
-    public SystemApp(User me) {
-        this.me = me;
-        this.contactList = new ArrayList<User>();
+    public SystemApp() throws SocketException, UnknownHostException {
+        this.me = new User("me", InetAddress.getLocalHost());
+        this.contactList = new ArrayList();
         this.listener = new UDPListener();
         this.udpUnicast = new UDPSender(me.getIp(), me.getPort());
         this.udpBroadcast = new UDPSender(me.getIp(), me.getPort());

@@ -4,9 +4,17 @@ import java.net.UnknownHostException;
 
 import UDP.UDPListener;
 import UDP.UDPSender;
+import Vues.LogIn;
+import objects.SystemApp;
 
 public class Main {
-    public static void main(String[] args) throws UnknownHostException, IOException {
+    public static void main(String[] args) throws IOException {
+
+        LogIn.create();
+        SystemApp app = new SystemApp();
+        app.start();
+
+        /*
         switch (args[0]){
             case "s":
                 UDPListener listener = new UDPListener();
@@ -19,6 +27,7 @@ public class Main {
                 sender.broadcast(msg, InetAddress.getByName("255.255.255.255"));
                 break;
         }
+        */
     }
 
 }
