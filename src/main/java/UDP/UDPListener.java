@@ -3,6 +3,8 @@ package UDP;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 import objects.SystemApp;
 
@@ -10,12 +12,14 @@ public class UDPListener {
     Thread thread;
     static int port = 49000;
 
+    private final SystemApp app = new SystemApp();
+
     public static void log(Object o) {
         Thread thread = Thread.currentThread();
         System.out.println("[" + thread.getName() + "] " + o);
     }
 
-    private static class GreeterServer extends Thread {
+    private class GreeterServer extends Thread {
         @Override
         public void run() {
             try (DatagramSocket socket = new DatagramSocket(port)) {
@@ -27,7 +31,7 @@ public class UDPListener {
                     String message = new String(packet.getData(), 0, packet.getLength());
                     log("Received: " + message);
                     //envoie du message au SystemApp
-                    SystemApp.receiveMessage(message);
+                    app.receiveMessage(message, packet.getAddress(), packet.getPort());
                 }
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -35,7 +39,7 @@ public class UDPListener {
             }
         }
     }
-    public UDPListener() {
+    public UDPListener() throws SocketException, UnknownHostException {
         thread = new GreeterServer();
     }
 

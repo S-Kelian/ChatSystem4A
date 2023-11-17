@@ -1,16 +1,25 @@
 package Vues;
 
+import objects.SystemApp;
+
 import javax.swing.*;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 public class LogIn {
 
-    public static void create(){
+    SystemApp app = new SystemApp();
+
+    public LogIn() throws SocketException, UnknownHostException {
+    }
+
+    public void create(){
 
         JFrame frame = new JFrame("LogIn");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(300, 300);
 
-
+        JPanel panel = new JPanel();
         JPanel panelNickname = new JPanel();
         JLabel label = new JLabel("Enter your nickname");
         JTextField tf = new JTextField(10);
@@ -20,14 +29,32 @@ public class LogIn {
         panelNickname.add(tf);
         panelNickname.add(send);
         panelbutton.add(send);
-        frame.add(panelNickname);
-        frame.add(panelbutton);
 
+
+        panel.add(panelNickname);
+        panel.add(panelbutton);
+        panel.setAlignmentY(JPanel.CENTER_ALIGNMENT);
+        frame.add(panel);
 
 
         send.addActionListener(e -> {
-            String text = tf.getText();
-            System.out.println(text);
+            String nickname = tf.getText();
+            boolean succes = app.setUsername(nickname);
+            if(succes){
+                frame.setVisible(false);
+                frame.dispose();
+                Chat chat = null;
+                try {
+                    chat = new Chat();
+                } catch (SocketException ex) {
+                    throw new RuntimeException(ex);
+                } catch (UnknownHostException ex) {
+                    throw new RuntimeException(ex);
+                }
+                chat.create();
+            } else {
+                JOptionPane.showMessageDialog(frame, "Nickname already used");
+            }
         });
 
         frame.setVisible(true);

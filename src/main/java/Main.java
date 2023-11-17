@@ -19,7 +19,8 @@ public class Main {
         }
 
         System.out.println("Ouverture de la fenetre de connexion");
-        LogIn.create();
+        LogIn logIn = new LogIn();
+        logIn.create();
 
 
         /*
