@@ -1,3 +1,4 @@
+import UDP.UDPListener;
 import Vues.LogIn;
 import objects.SystemApp;
 
@@ -6,23 +7,19 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) throws IOException {
 
-
+        System.out.println("Lancement de l'application");
         SystemApp app = SystemApp.getInstance();
-        app.start();
-        System.out.println("Recupération de la contact list");
+        UDPListener listener = new UDPListener();
+        listener.start();
 
-        //delay 1s
+        // Delay to let the listener start
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        System.out.println("Ouverture de la fenetre de connexion");
         LogIn logIn = new LogIn();
         logIn.create();
-
-
         /*
         switch (args[0]){
             case "s":

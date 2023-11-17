@@ -12,7 +12,7 @@ public class UDPListener {
     Thread thread;
     static int port = 49000;
 
-    private final SystemApp app = SystemApp.getInstance();
+    private SystemApp app = SystemApp.getInstance();
 
     public static void log(Object o) {
         Thread thread = Thread.currentThread();

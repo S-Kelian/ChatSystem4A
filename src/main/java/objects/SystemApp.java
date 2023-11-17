@@ -11,7 +11,6 @@ import UDP.UDPSender;
 public class SystemApp {
     private User me;
     private ArrayList<User> contactList;
-    private UDPListener listener;
     private UDPSender udpUnicast;
     private UDPSender udpBroadcast;
 
@@ -20,7 +19,6 @@ public class SystemApp {
     private SystemApp() throws SocketException, UnknownHostException {
         this.me = new User("me", InetAddress.getLocalHost());
         this.contactList = new ArrayList();
-        this.listener = new UDPListener();
         this.udpUnicast = new UDPSender(me.getIp(), me.getPort());
         this.udpBroadcast = new UDPSender(me.getIp(), me.getPort());
     }
@@ -37,13 +35,6 @@ public class SystemApp {
     }
     public ArrayList<User> getContactList() {
         return contactList;
-    }
-
-    public void start() {
-        listener.start();
-    }
-    public void stop() {
-        listener.stop();
     }
 
     public boolean setUsername(String nickname){
