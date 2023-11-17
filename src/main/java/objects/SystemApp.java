@@ -65,11 +65,14 @@ public class SystemApp {
     public void removeContact(User user) {
         contactList.remove(user);
     }
-    public static void receiveMessage(String message) {
-        System.out.println("System app: " + message);
+    public void receiveMessage(String message, InetAddress address, int port) {
+        if (message.startsWith("update request from : ")) {
+            String messageToSend = "update response from : " + me.getNickname();
+            sendUnicast(messageToSend, address);
+        }
     }
     public void contactListUpdateRoutine() {
-        String updateMessage = "update";
+        String updateMessage = "update request from : " + me.getNickname();
         sendBroadcast(updateMessage);
 
     }
