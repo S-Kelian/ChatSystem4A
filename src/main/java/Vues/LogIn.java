@@ -14,12 +14,14 @@ public class LogIn {
         JPanel panelNickname = new JPanel();
         JLabel label = new JLabel("Enter your nickname");
         JTextField tf = new JTextField(10);
-        JPanel
+        JPanel panelbutton = new JPanel();
         JButton send = new JButton("Send");
         panelNickname.add(label);
         panelNickname.add(tf);
         panelNickname.add(send);
+        panelbutton.add(send);
         frame.add(panelNickname);
+        frame.add(panelbutton);
 
 
 
