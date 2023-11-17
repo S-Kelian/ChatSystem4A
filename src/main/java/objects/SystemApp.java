@@ -55,7 +55,7 @@ public class SystemApp {
     public void removeContact(User user) {
         contactList.remove(user);
     }
-    public static void reveiveMessage(String message) {
+    public static void receiveMessage(String message) {
         System.out.println("System app: " + message);
     }
     public void contactListUpdateRoutine() {
