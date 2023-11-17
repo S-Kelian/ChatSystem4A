@@ -15,12 +15,21 @@ public class SystemApp {
     private UDPSender udpUnicast;
     private UDPSender udpBroadcast;
 
-    public SystemApp() throws SocketException, UnknownHostException {
+    private static SystemApp instance = null;
+
+    private SystemApp() throws SocketException, UnknownHostException {
         this.me = new User("me", InetAddress.getLocalHost());
         this.contactList = new ArrayList();
         this.listener = new UDPListener();
         this.udpUnicast = new UDPSender(me.getIp(), me.getPort());
         this.udpBroadcast = new UDPSender(me.getIp(), me.getPort());
+    }
+
+    public static SystemApp getInstance() throws SocketException, UnknownHostException {
+        if (instance == null) {
+            instance = new SystemApp();
+        }
+        return instance;
     }
 
     public User getMe() {

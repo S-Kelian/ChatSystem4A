@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
 
 public class LogIn {
 
-    SystemApp app = new SystemApp();
+    SystemApp app = SystemApp.getInstance();
 
     public LogIn() throws SocketException, UnknownHostException {
     }

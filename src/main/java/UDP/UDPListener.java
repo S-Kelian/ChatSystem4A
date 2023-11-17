@@ -12,7 +12,7 @@ public class UDPListener {
     Thread thread;
     static int port = 49000;
 
-    private final SystemApp app = new SystemApp();
+    private final SystemApp app = SystemApp.getInstance();
 
     public static void log(Object o) {
         Thread thread = Thread.currentThread();
@@ -23,9 +23,10 @@ public class UDPListener {
         @Override
         public void run() {
             try (DatagramSocket socket = new DatagramSocket(port)) {
+                boolean running = true;
                 byte[] bufferRecv = new byte[1024];
                 DatagramPacket packet = new DatagramPacket(bufferRecv, bufferRecv.length);
-                while (true) {
+                while (running) {
                     socket.setBroadcast(true);
                     socket.receive(packet);
                     String message = new String(packet.getData(), 0, packet.getLength());

@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
 
 public class Chat {
 
-    SystemApp app = new SystemApp();
+    SystemApp app = SystemApp.getInstance();
 
     public Chat() throws SocketException, UnknownHostException {
     }

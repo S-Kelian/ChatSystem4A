@@ -7,7 +7,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
 
-        SystemApp app = new SystemApp();
+        SystemApp app = SystemApp.getInstance();
         app.start();
         System.out.println("Recupération de la contact list");
 
