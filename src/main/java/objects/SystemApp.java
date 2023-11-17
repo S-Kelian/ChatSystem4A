@@ -22,8 +22,6 @@ public class SystemApp {
 
     public void start() {
         listener.start();
-        udpUnicast.start();
-        udpBroadcast.start();
     }
 
 
