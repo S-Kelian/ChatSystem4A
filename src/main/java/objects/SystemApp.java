@@ -1,4 +1,5 @@
 package objects;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -6,7 +7,6 @@ import java.util.ArrayList;
 
 import UDP.UDPListener;
 import UDP.UDPSender;
-import objects.User;
 
 public class SystemApp {
     private User me;
@@ -23,10 +23,46 @@ public class SystemApp {
         this.udpBroadcast = new UDPSender(me.getIp(), me.getPort());
     }
 
+    public User getMe() {
+        return me;
+    }
+    public ArrayList<User> getContactList() {
+        return contactList;
+    }
+
     public void start() {
         listener.start();
     }
+    public void stop() {
+        listener.stop();
+    }
 
+    public void sendBroadcast(String message) {
+        try {
+            udpBroadcast.broadcast(message, InetAddress.getByName("255.255.255.255"));
+        } catch (IOException e) {
+        }
+    }
+    public void sendUnicast(String message, InetAddress address) {
+        try {
+            udpUnicast.broadcast(message, address);
+        } catch (IOException e) {
+        }
+    }
+    public void addContact(User user) {
+        contactList.add(user);
+    }
+    public void removeContact(User user) {
+        contactList.remove(user);
+    }
+    public static void reveiveMessage(String message) {
+        System.out.println("System app: " + message);
+    }
+    public void contactListUpdateRoutine() {
+        String updateMessage = "update";
+        sendBroadcast(updateMessage);
+
+    }
 
 
 }

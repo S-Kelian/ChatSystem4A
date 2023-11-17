@@ -1,10 +1,10 @@
 package UDP;
 
-import objects.SystemApp;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+
+import objects.SystemApp;
 
 public class UDPListener {
     Thread thread;
@@ -27,7 +27,7 @@ public class UDPListener {
                     String message = new String(packet.getData(), 0, packet.getLength());
                     log("Received: " + message);
                     //envoie du message au SystemApp
-                    SystemApp.receive(message);
+                    SystemApp.receiveMessage(message);
                 }
             } catch (IOException e) {
                 // TODO Auto-generated catch block
