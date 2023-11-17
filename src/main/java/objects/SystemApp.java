@@ -37,6 +37,16 @@ public class SystemApp {
         listener.stop();
     }
 
+    public boolean setUsername(String nickname){
+        for (User user : contactList) {
+            if (user.getNickname().equals(nickname)) {
+                return false;
+            }
+        }
+        me.setNickname(nickname);
+        return true;
+    }
+
     public void sendBroadcast(String message) {
         try {
             udpBroadcast.broadcast(message, InetAddress.getByName("255.255.255.255"));

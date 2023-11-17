@@ -1,7 +1,6 @@
 package objects;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 public class User{
     
@@ -30,6 +29,10 @@ public class User{
 
     public void disconnect(){
         this.status = false;
+    }
+
+    public String getNickname(){
+        return this.nickname;
     }
 
     public InetAddress getIp(){
