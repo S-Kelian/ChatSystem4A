@@ -47,6 +47,7 @@ public class SystemApp {
     }
 
     public boolean setUsername(String nickname){
+        contactListUpdateRoutine();
         for (User user : contactList) {
             if (user.getNickname().equals(nickname)) {
                 return false;
@@ -83,7 +84,6 @@ public class SystemApp {
     public void contactListUpdateRoutine() {
         String updateMessage = "update request from : " + me.getNickname();
         sendBroadcast(updateMessage);
-
     }
 
 
