@@ -9,20 +9,26 @@ public class LogIn {
         JFrame frame = new JFrame("LogIn");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(300, 300);
-        frame.setVisible(true);
 
-        JPanel panel = new JPanel();
+
+        JPanel panelNickname = new JPanel();
         JLabel label = new JLabel("Enter your nickname");
         JTextField tf = new JTextField(10);
+        JPanel
         JButton send = new JButton("Send");
-        panel.add(label);
-        frame.add(panel);
+        panelNickname.add(label);
+        panelNickname.add(tf);
+        panelNickname.add(send);
+        frame.add(panelNickname);
+
+
 
         send.addActionListener(e -> {
             String text = tf.getText();
             System.out.println(text);
         });
 
+        frame.setVisible(true);
     }
 
 }

@@ -5,11 +5,11 @@ import java.net.UnknownHostException;
 
 public class User{
     
-    public String nickname;
-    public int port;
-    public InetAddress ip;
+    private String nickname;
+    private int port;
+    private InetAddress ip;
 
-    public boolean status = false;
+    private boolean status = false;
 
     public User(String nickname, InetAddress ip){
         this.nickname = nickname;

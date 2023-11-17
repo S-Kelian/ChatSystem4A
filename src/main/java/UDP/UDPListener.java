@@ -1,5 +1,7 @@
 package UDP;
 
+import objects.SystemApp;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -16,18 +18,16 @@ public class UDPListener {
     private static class GreeterServer extends Thread {
         @Override
         public void run() {
-            boolean running = true;
             try (DatagramSocket socket = new DatagramSocket(port)) {
                 byte[] bufferRecv = new byte[1024];
                 DatagramPacket packet = new DatagramPacket(bufferRecv, bufferRecv.length);
-                while (running) {
+                while (true) {
                     socket.setBroadcast(true);
                     socket.receive(packet);
                     String message = new String(packet.getData(), 0, packet.getLength());
-                    log("Greetings "+message+" !!!");
-                    if (message.equals("bye")) {
-                        running = false;
-                    }
+                    log("Received: " + message);
+                    //envoie du message au SystemApp
+                    SystemApp.receive(message);
                 }
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -41,5 +41,9 @@ public class UDPListener {
 
     public void start() {
         thread.start();
+    }
+
+    public void stop() {
+        thread.interrupt();
     }
 }
