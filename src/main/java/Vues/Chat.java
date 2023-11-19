@@ -22,5 +22,33 @@ public class Chat {
         JPanel panel = new JPanel();
         JPanel panelNickname = new JPanel();
         JLabel label = new JLabel("Welcome " + app.getMe().getNickname());
+
+        panelNickname.add(label);
+        panel.add(panelNickname);
+        panel.setAlignmentX(JPanel.CENTER_ALIGNMENT);
+        frame.add(panel);
+
+
+        JPanel panelUsersOnline = new JPanel();
+        // get users online list
+        JLabel labelUsersOnline = new JLabel("Users online : " + app.getUsersOnline().size());
+        panelUsersOnline.add(labelUsersOnline);
+        panelUsersOnline.setAlignmentY(JPanel.CENTER_ALIGNMENT);
+        JLabel[] usersOnline = new JLabel[app.getUsersOnline().size()];
+        for (int i = 0; i < app.getUsersOnline().size(); i++) {
+            usersOnline[i] = new JLabel(app.getUsersOnline().get(i).getNickname());
+            if (app.getUsersOnline().get(i).getNickname().equals(app.getMe().getNickname())) {
+                usersOnline[i].setText(usersOnline[i].getText() + " (you)");
+            }
+            panelUsersOnline.add(usersOnline[i]);
+        }
+        panelUsersOnline.setAlignmentX(JPanel.CENTER_ALIGNMENT);
+
+
+        panel.add(panelUsersOnline);
+
+
+
+        frame.setVisible(true);
     }
 }

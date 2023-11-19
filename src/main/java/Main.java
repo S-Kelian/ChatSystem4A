@@ -9,6 +9,7 @@ public class Main {
 
         System.out.println("Lancement de l'application");
         SystemApp app = SystemApp.getInstance();
+        app.usersOnlineUpdateRoutine();
         UDPListener listener = new UDPListener();
         listener.start();
 

@@ -32,7 +32,7 @@ public class UDPListener {
                     String message = new String(packet.getData(), 0, packet.getLength());
                     log("Received: " + message);
                     //envoie du message au SystemApp
-                    app.receiveMessage(message, packet.getAddress(), packet.getPort());
+                    app.receiveMessage(message, packet.getAddress());
                 }
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -48,7 +48,4 @@ public class UDPListener {
         thread.start();
     }
 
-    public void stop() {
-        thread.interrupt();
-    }
 }
