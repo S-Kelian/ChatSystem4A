@@ -42,9 +42,19 @@ public class Chat {
             }
             panelUsersOnline.add(usersOnline[i]);
         }
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            // get users online list
+            labelUsersOnline.setText("Users online : " + app.getUsersOnline().size());
+            for (int i = 0; i < app.getUsersOnline().size(); i++) {
+                usersOnline[i].setText(app.getUsersOnline().get(i).getNickname());
+                if (app.getUsersOnline().get(i).getNickname().equals(app.getMe().getNickname())) {
+                    usersOnline[i].setText(usersOnline[i].getText() + " (you)");
+                }
+            }
+        });
+        panelUsersOnline.add(refresh);
         panelUsersOnline.setAlignmentX(JPanel.CENTER_ALIGNMENT);
-
-
         panel.add(panelUsersOnline);
 
 
