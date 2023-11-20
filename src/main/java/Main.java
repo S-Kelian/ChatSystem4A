@@ -1,18 +1,19 @@
+import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import UDP.UDPListener;
 import Vues.LogIn;
 import objects.SystemApp;
 
-import java.io.IOException;
-
 public class Main {
     public static void main(String[] args) throws IOException {
-
+        Timer timer = new Timer();
         System.out.println("Lancement de l'application");
         SystemApp app = SystemApp.getInstance();
-        app.usersOnlineUpdateRoutine();
+        app.usersListUpdateRoutine();
         UDPListener listener = new UDPListener();
         listener.start();
-
         // Delay to let the listener start
         try {
             Thread.sleep(1000);
@@ -35,6 +36,11 @@ public class Main {
                 break;
         }
         */
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                app.usersListUpdateRoutine();
+            }
+        }, 0, 60000);
     }
-
 }

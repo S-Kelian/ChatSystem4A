@@ -39,4 +39,7 @@ public class User{
     public int getPort() {
         return this.port;
     }
+    public int getStatus(){
+        return this.status;
+    }
 }

@@ -33,9 +33,9 @@ public class UDPListener {
                     log("Received: " + message);
                     //envoie du message au SystemApp
                     app.receiveMessage(message, packet.getAddress());
+
                 }
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }

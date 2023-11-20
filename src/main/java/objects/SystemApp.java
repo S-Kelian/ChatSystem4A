@@ -1,23 +1,23 @@
 package objects;
 
-import UDP.UDPSender;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+import UDP.UDPSender;
+
 public class SystemApp {
     private final User me;
-    private final ArrayList<User> usersOnline;
+    private final ArrayList<User> usersList;
 
     private final UDPSender udpSender;
     private static SystemApp instance = null;
 
     private SystemApp() throws SocketException, UnknownHostException {
         this.me = new User("me", InetAddress.getLocalHost());
-        this.usersOnline = new ArrayList<>();
+        this.usersList = new ArrayList<>();
         this.udpSender = new UDPSender(me.getIp());
         this.addUserOnline(me);
     }
@@ -32,18 +32,28 @@ public class SystemApp {
     public User getMe() {
         return me;
     }
-    public ArrayList<User> getUsersOnline() {
-        return usersOnline;
+    public ArrayList<User> getusersList() {
+        return usersList;
     }
 
-    public boolean setUsername(String nickname){
-        usersOnlineUpdateRoutine();
-        for (User user : usersOnline) {
+    public boolean setMyUsername(String nickname){
+        usersListUpdateRoutine();
+        for (User user : usersList) {
             if (user.getNickname().equals(nickname)) {
                 return false;
             }
         }
+        sendBroadcast("Nickname update : " + me.getNickname() + " -> " + nickname );
         me.setNickname(nickname);
+        return true;
+    }
+    public boolean setSomeoneUsername(String previousNn, String newNn){
+        usersListUpdateRoutine();
+        User dude = getUserByName(previousNn);
+        if (dude == null){
+            return false;
+        }
+        dude.setNickname(newNn);
         return true;
     }
 
@@ -70,10 +80,10 @@ public class SystemApp {
         }
     }
     public void addUserOnline(User user) {
-        usersOnline.add(user);
+        usersList.add(user);
     }
     public void removeUserOnline(User user) {
-        usersOnline.remove(user);
+        usersList.remove(user);
     }
 
     /**
@@ -88,7 +98,7 @@ public class SystemApp {
         } else if (message.startsWith("update response from : ")) {
             // get the nickname of the user and add it to the list of users online if it is not already in it
             String nickname = message.substring(23);
-            if (!checkUsersOnlineByName(nickname)) {
+            if (!checkusersListByName(nickname)) {
                 User user = new User(nickname, address);
                 addUserOnline(user);
             }
@@ -98,17 +108,36 @@ public class SystemApp {
     /**
      * Send a broadcast message to all users to update the list of users online
      */
-    public void usersOnlineUpdateRoutine() {
+    public void usersListUpdateRoutine() {
         String updateMessage = "update request from : " + me.getNickname();
         sendBroadcast(updateMessage);
     }
 
-    public boolean checkUsersOnlineByName(String name) {
-        for (User user : usersOnline) {
+    public boolean checkusersListByName(String name) {
+        for (User user : usersList) {
             if (user.getNickname().equals(name)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public User getUserByName(String name) {
+        for (User user : usersList) {
+            if (user.getNickname().equals(name)) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    public ArrayList<User> getUsersOnline(){
+        ArrayList<User> usersOnline = new ArrayList<>();
+        for (User user : usersList) {
+            if (user.getStatus() != 0) {
+                usersOnline.add(user);
+            }
+        }
+        return usersOnline;
     }
 }

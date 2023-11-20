@@ -1,10 +1,16 @@
 package Vues;
 
-import objects.SystemApp;
-
-import javax.swing.*;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import objects.SystemApp;
 
 public class LogIn {
 
@@ -37,7 +43,7 @@ public class LogIn {
 
         send.addActionListener(e -> {
             String nickname = tf.getText();
-            boolean succes = app.setUsername(nickname);
+            boolean succes = app.setMyUsername(nickname);
             if(succes){
                 frame.setVisible(false);
                 frame.dispose();
