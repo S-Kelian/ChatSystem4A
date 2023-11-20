@@ -30,12 +30,10 @@ public class LogIn {
         panelNickname.add(send);
         panelbutton.add(send);
 
-
         panel.add(panelNickname);
         panel.add(panelbutton);
         panel.setAlignmentY(JPanel.CENTER_ALIGNMENT);
         frame.add(panel);
-
 
         send.addActionListener(e -> {
             String nickname = tf.getText();
