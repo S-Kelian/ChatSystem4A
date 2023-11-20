@@ -105,6 +105,9 @@ public class SystemApp {
                 User user = new User(nickname, address);
                 addUser(user);
             }
+        } else if (message.startsWith("Nickname update : ")) {
+            String[] nicknames = message.substring(18).split(" -> ");
+            setSomeoneUsername(nicknames[0], nicknames[1]);
         }
     }
 
