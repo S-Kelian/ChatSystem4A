@@ -8,7 +8,8 @@ public class User{
     private int port;
     private InetAddress ip;
 
-    private boolean status = false;
+    // 0 = offline, 1 = online, 2 = busy, 3 = away
+    private int status = 0;
 
     public User(String nickname, InetAddress ip){
         this.nickname = nickname;
@@ -23,12 +24,8 @@ public class User{
         this.port = port;
     }
 
-    public void connect(){
-        this.status = true;
-    }
-
-    public void disconnect(){
-        this.status = false;
+    public void setStatus(int status){
+        this.status = status;
     }
 
     public String getNickname(){
