@@ -1,27 +1,11 @@
-# ~~Burn~~ Replace with your own after reading
+This project aims to deliver a peer-to-peer app for communication on a local network. It provides an easy way to communicate within a company. It must be easy to use and easy to install.
+The app runs on the version 17 of the Java Development Kit and Maven.
 
-This private repository is created for you so that your teachers have access to it.
+First you will need to clone the repository on your machine using this command:
 
-## Identify yourself
+git clone https://github.com/insa-4ir-chatsystem/chatsystem-sebaici-zenou-truchot.git
 
-Before anything, **complete the `metadata.yml` with your own information.** 
+Use these command lines on your machine to use the app:
 
-This is the file that we will use to identify the teacher responsible for the repository and assign the grades to the participating students.
-
-## Take ownership
-
-As long as you make sure to keep the `metadata.yml` file at the root of this repository, you are free to do anything. Our suggestion would be to have it organized into something like the following:
-
-    .gitignore
-    metadata.yml
-    pom.xml
-    README.md
-    src/
-      main/
-      test/
-    doc/
-      uml/
-      report.pdf
-
-In particular, you will soon have to replace this README with something that describes your own project.
-toto
+mvn clean package
+java -jar target/ChatSytem-1.0-SNAPSHOT.jar
