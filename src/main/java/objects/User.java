@@ -9,7 +9,7 @@ public class User{
     private InetAddress ip;
 
     // 0 = offline, 1 = online, 2 = busy, 3 = away
-    private int status = 0;
+    private int status = 1;
 
     public User(String nickname, InetAddress ip){
         this.nickname = nickname;

@@ -19,7 +19,7 @@ public class SystemApp {
         this.me = new User("me", InetAddress.getLocalHost());
         this.usersList = new ArrayList<>();
         this.udpSender = new UDPSender(me.getIp());
-        this.addUserOnline(me);
+        this.addUser(me);
     }
 
     public static SystemApp getInstance() throws SocketException, UnknownHostException {
@@ -79,7 +79,7 @@ public class SystemApp {
         } catch (IOException ignored) {
         }
     }
-    public void addUserOnline(User user) {
+    public void addUser(User user) {
         usersList.add(user);
     }
     public void removeUserOnline(User user) {
@@ -92,6 +92,9 @@ public class SystemApp {
      * @param address of the sender
      */
     public void receiveMessage(String message, InetAddress address) {
+        if (address == me.getIp()) {
+            return;
+        }
         if (message.startsWith("update request from : ")) {
             String messageToSend = "update response from : " + me.getNickname();
             sendUnicast(messageToSend, address);
@@ -100,7 +103,7 @@ public class SystemApp {
             String nickname = message.substring(23);
             if (!checkusersListByName(nickname)) {
                 User user = new User(nickname, address);
-                addUserOnline(user);
+                addUser(user);
             }
         }
     }
