@@ -14,7 +14,7 @@ First you will need to clone the repository on your machine using this command:
 ```
 git clone https://github.com/insa-4ir-chatsystem/chatsystem-sebaici-zenou-truchot.git
 ```
-Use these command lines on your machine to use the app:
+Use the following command lines on your machine to launch the app:
 ```
 mvn clean package
 ```
