@@ -16,7 +16,7 @@ public class SystemAppTest {
 
     @Test
     public void testSetMyNickname(){
-        assert appTest.setMyUsername("test0");
+        assert appTest.setMyUsername("test0") == "Success";
     }
 
     @Test
@@ -27,10 +27,10 @@ public class SystemAppTest {
     }
 
     @Test
-    public void testRemoveUserOnline(){
+    public void testSetUserOffline(){
         User user = new User("test2", appTest.getMe().getIp());
         appTest.addUser(user);
-        appTest.removeUserOnline(user);
+        appTest.setUserOffline(user);
         assert !appTest.getUsersOnline().contains(user);
     }
 

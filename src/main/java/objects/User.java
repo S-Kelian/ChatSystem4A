@@ -16,6 +16,10 @@ public class User{
         this.ip = ip;
     }
 
+    public User(InetAddress ip){
+        this.ip = ip;
+    }
+
     public void setNickname(String nickname){
         this.nickname = nickname;
     }

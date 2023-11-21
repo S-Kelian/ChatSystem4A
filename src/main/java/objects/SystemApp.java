@@ -32,29 +32,38 @@ public class SystemApp {
     public User getMe() {
         return me;
     }
-    public ArrayList<User> getusersList() {
+    public ArrayList<User> getUsersList() {
         return usersList;
     }
 
-    public boolean setMyUsername(String nickname){
-        usersListUpdateRoutine();
+    public String setMyUsername(String nickname){
+        String returnStatus;
+
+        if (nickname.equals("") || nickname == null) {
+            returnStatus = "Username can't be empty";
+            return returnStatus;
+        }
         for (User user : usersList) {
             if (user.getNickname().equals(nickname)) {
-                return false;
+                returnStatus = "Username already taken";
+                return returnStatus;
             }
         }
-        sendBroadcast("Nickname update : " + me.getNickname() + " -> " + nickname );
+        if (me.getNickname()!=null && !me.getNickname().equals(nickname)){
+            sendBroadcast("Nickname update : " + nickname );
+        }
         me.setNickname(nickname);
-        return true;
+        returnStatus = "Success";
+        return returnStatus;
     }
-    public boolean setSomeoneUsername(String previousNn, String newNn){
-        usersListUpdateRoutine();
-        User dude = getUserByName(previousNn);
+    public void setSomeoneUsername(InetAddress address, String newNn){
+        User dude = getUserByIp(address);
+        // if the user is not in the list, we add it
         if (dude == null){
-            return false;
+            dude = new User(newNn, address);
+            addUser(dude);
         }
         dude.setNickname(newNn);
-        return true;
     }
 
     /**
@@ -82,8 +91,8 @@ public class SystemApp {
     public void addUser(User user) {
         usersList.add(user);
     }
-    public void removeUserOnline(User user) {
-        usersList.remove(user);
+    public void setUserOffline(User user) {
+        user.setStatus(0);
     }
 
     /**
@@ -101,13 +110,21 @@ public class SystemApp {
         } else if (message.startsWith("update response from : ")) {
             // get the nickname of the user and add it to the list of users online if it is not already in it
             String nickname = message.substring(23);
-            if (!checkusersListByName(nickname)) {
+            if (!getUserByIp(address).getNickname().equals(nickname) && !checkUsersListByName(nickname)) {
                 User user = new User(nickname, address);
                 addUser(user);
+            } else {
+                // if the user is already in the list, we update his nickname
+                setSomeoneUsername(address, nickname);
             }
         } else if (message.startsWith("Nickname update : ")) {
-            String[] nicknames = message.substring(18).split(" -> ");
-            setSomeoneUsername(nicknames[0], nicknames[1]);
+            String nickname = message.substring(18);
+            setSomeoneUsername(address, nickname);
+        } else if (message.equals("disconnect")) {
+            setUserOffline(getUserByIp(address));
+        } else {
+            // if the message is not a command, we display it
+            System.out.println(message);
         }
     }
 
@@ -119,7 +136,7 @@ public class SystemApp {
         sendBroadcast(updateMessage);
     }
 
-    public boolean checkusersListByName(String name) {
+    public boolean checkUsersListByName(String name) {
         for (User user : usersList) {
             if (user.getNickname().equals(name)) {
                 return true;
@@ -137,6 +154,15 @@ public class SystemApp {
         return null;
     }
 
+    public User getUserByIp(InetAddress ip) {
+        for (User user : usersList) {
+            if (user.getIp().equals(ip)) {
+                return user;
+            }
+        }
+        return null;
+    }
+
     public ArrayList<User> getUsersOnline(){
         ArrayList<User> usersOnline = new ArrayList<>();
         for (User user : usersList) {
@@ -145,5 +171,10 @@ public class SystemApp {
             }
         }
         return usersOnline;
+    }
+
+    public void disconnect() {
+        sendBroadcast("disconnect");
+        System.exit(0);
     }
 }

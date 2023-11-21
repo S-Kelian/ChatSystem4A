@@ -42,12 +42,17 @@ public class LogIn {
         frame.add(panel);
 
         send.addActionListener(e -> {
+            app.usersListUpdateRoutine();
             String nickname = tf.getText();
-            boolean succes = app.setMyUsername(nickname);
-            if(succes){
+            if (nickname.equals("")) {
+                JOptionPane.showMessageDialog(frame, "Please enter a nickname");
+                return;
+            }
+            String status = app.setMyUsername(nickname);
+            if(status == "Success"){
                 frame.setVisible(false);
                 frame.dispose();
-                Chat chat = null;
+                Chat chat;
                 try {
                     chat = new Chat();
                 } catch (SocketException ex) {
@@ -57,7 +62,7 @@ public class LogIn {
                 }
                 chat.create();
             } else {
-                JOptionPane.showMessageDialog(frame, "Nickname already used");
+                JOptionPane.showMessageDialog(frame, status);
             }
         });
 

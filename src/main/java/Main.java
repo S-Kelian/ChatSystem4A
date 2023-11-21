@@ -36,11 +36,16 @@ public class Main {
                 break;
         }
         */
+
+
+        /*
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 app.usersListUpdateRoutine();
             }
-        }, 0, 60000);
+        }, 0, 10000);
+*/
+
     }
 }

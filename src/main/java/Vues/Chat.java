@@ -6,11 +6,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import objects.SystemApp;
 
@@ -30,7 +26,7 @@ public class Chat {
     public void create() {
 
         JFrame frame = new JFrame("Chat");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         //set max size
         frame.setSize(500, 500);
 
@@ -40,6 +36,9 @@ public class Chat {
         JPanel panelUsersOnline = new JPanel();
         JLabel labelUsersOnline = new JLabel("Users online : " + app.getUsersOnline().size());
         JButton refresh = new JButton("Refresh");
+        JPanel profilePanel = new JPanel();
+        JButton rename = new JButton("Rename");
+        JButton disconnect = new JButton("Disconnect");
 
         // Set properties
         mainPanel.setLayout(new BorderLayout());
@@ -49,9 +48,12 @@ public class Chat {
         panelUsersOnline.add(labelUsersOnline , BorderLayout.PAGE_START);
         panelUsersOnline.add(refresh, BorderLayout.PAGE_END);
         panelNickname.add(titleLabel);
+        profilePanel.add(rename);
+        profilePanel.add(disconnect);
 
         mainPanel.add(panelNickname, BorderLayout.PAGE_START);
         mainPanel.add(panelUsersOnline, BorderLayout.LINE_END);
+        mainPanel.add(profilePanel, BorderLayout.PAGE_END);
         frame.add(mainPanel);
 
         // Create the list of online users
@@ -60,6 +62,7 @@ public class Chat {
         // Events
         refresh.addActionListener(e -> {
             // Refresh the list of online users
+            app.usersListUpdateRoutine();
             usersOnline.clear();
             panelUsersOnline.removeAll();
             labelUsersOnline.setText("Users online : " + app.getUsersOnline().size());
@@ -68,6 +71,29 @@ public class Chat {
             createLabelsOfUsers(panelUsersOnline);
             panelUsersOnline.revalidate();
             panelUsersOnline.repaint();
+        });
+
+        rename.addActionListener(e -> {
+            // Rename the user
+            app.usersListUpdateRoutine();
+            String newNickname = JOptionPane.showInputDialog(frame, "Enter your new nickname");
+            String status = app.setMyUsername(newNickname);
+            if (status.equals("Success")) {
+                titleLabel.setText("Welcome " + app.getMe().getNickname());
+                for (JLabel userLabel : usersOnline) {
+                    if (userLabel.getText().contains("(you)")) {
+                        userLabel.setText(app.getMe().getNickname() + " (you)");
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(frame, status);
+            }
+        });
+
+        disconnect.addActionListener(e -> {
+            // Disconnect the user and close chat system
+            app.disconnect();
+            frame.dispose();
         });
 
         // Making the window visible
