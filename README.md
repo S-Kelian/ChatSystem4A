@@ -7,7 +7,7 @@ The app runs on the version 17 of the Java Development Kit and Maven.
 
 With the current version you will be able to :
   - create a profile by setting a pseudo
-  - change your password and inform other people on the network
+  - change your pseudo and inform other people on the network of this change
   - automatically/periodically update the list of the users currently connected on the network
 
 First you will need to clone the repository on your machine using this command:
