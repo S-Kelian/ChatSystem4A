@@ -62,7 +62,7 @@ public class LogIn {
                 }
                 chat.create();
             } else {
-                JOptionPane.showMessageDialog(frame, status);
+                JOptionPane.showMessageDialog(frame, "error");
             }
         });
 

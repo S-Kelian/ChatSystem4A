@@ -16,6 +16,7 @@ public class UDPListener {
 
     public static void log(Object o) {
         Thread thread = Thread.currentThread();
+        thread.setName("UDPListener");
         System.out.println("[" + thread.getName() + "] " + o);
     }
 

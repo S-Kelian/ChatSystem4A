@@ -8,13 +8,14 @@ import java.net.UnknownHostException;
 import UDP.UDPSender;
 
 public class SystemApp {
-    private User me;
-    private static UserList myUserList;
+    private final User me;
+    private final UserList myUserList;
     private final UDPSender udpSender;
     private static SystemApp instance = null;
 
     private SystemApp() throws SocketException, UnknownHostException {
         this.me = new User("me", InetAddress.getLocalHost());
+        System.out.println("My ip is " + me.getIp());
         this.udpSender = new UDPSender(me.getIp());
         myUserList = new UserList(me);
     }
@@ -26,19 +27,28 @@ public class SystemApp {
         return instance;
     }
 
+    /**
+     * Get the user of the system
+     * @return the user
+     */
     public User getMe() {
         return me;
     }
+
+    /**
+     * Get the userlist of the system
+     * @return the userlist
+     */
     public UserList getMyUserList(){
         return myUserList;
     }
     /**
-     * Set the nickname of the user and uses an error code to let the user know if the operation was successful and if not, why
-     * @param nickname to send
+     * Set the nickname of the user and return an error code to let the user know if the operation was successful or not.
+     * @param nickname new nickname of the user
      */
     public int setMyUsername(String nickname){ // the success of the operation is returned as an int equal to 0 if success and 1 if the nickname is already taken and 2 if the nickname is not valid
         // First we need to check if the user is using a valid nickname
-        if (nickname.equals("") || nickname == null) {
+        if (nickname.equals("")) {
             return 2;
         }
         // Now that we know that the nickname us valid, we need to check if it is already taken
@@ -49,6 +59,12 @@ public class SystemApp {
         myUserList.updateNickname(me.getIp(), me.getNickname());
         return 0;
     }
+
+    /**
+     * Set the nickname of a user of the userlist and return an error code to let the user know if the operation was successful or not.
+     * @param address of the user to update
+     * @param newNn new nickname of the user
+     */
     public int setSomeoneUsername(InetAddress address, String newNn){ // the success of the operation is returned as an int equal to 0 if success and 1 if the user is not in the list and 2 if the nickname is already taken
         // if the user is not in the list, we add him
         if (!myUserList.UserIsInListByIp(address)){
@@ -88,20 +104,16 @@ public class SystemApp {
         }
     }
 
-    public void setUserOffline(User user) {
-        user.setStatus(0);
-    }
-
     /**
      * Treatment of the received message
      * @param message received
      * @param address of the sender
      */
-    public void receiveMessage(String message, InetAddress address) {
-        if (address == me.getIp()) {
+    public void receiveMessage(String message, InetAddress address) throws UnknownHostException {
+        if (me.getIp().toString().contains(address.toString())) {
             return;
         }
-        if (message.startsWith("update request from : ")) {
+        if (message.startsWith("update request")) {
             String messageToSend = "update response from : " + me.getNickname();
             sendUnicast(messageToSend, address);
         } else if (message.startsWith("update response from : ")) {
@@ -129,10 +141,13 @@ public class SystemApp {
      * Send a broadcast message to all users to update the list of users online
      */
     public void usersListUpdateRoutine() {
-        String updateMessage = "update request from : " + me.getIp();
+        String updateMessage = "update request";
         sendBroadcast(updateMessage);
     }
 
+    /**
+     * Disconnect the user from the chat
+     */
     public void disconnect() {
         sendBroadcast("disconnect");
         System.exit(0);

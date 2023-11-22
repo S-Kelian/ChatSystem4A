@@ -5,31 +5,48 @@ import java.net.InetAddress;
 
 public class UserList {
 
-  private ArrayList<User> contacts;
+  private final ArrayList<User> contacts;
   
   public UserList(User me){
-    contacts = new ArrayList<User>();
+    contacts = new ArrayList<>();
     contacts.add(me);
   }
 
+  /**
+   * Return the list of users
+   * @return the list of users
+   */
   public ArrayList<User> getUserList(){
     return contacts;
   }
-  
+
+    /**
+     * Add a user to the list
+     * @param someone the user to add
+     */
   public void addUser(User someone){
     contacts.add(someone);
   }
-  public void removeUser(User someone){
-    contacts.remove(someone);
-  }
-  public void updateUserStatus(InetAddress someonesAdress, int status){
-    User someone = getUserByIp(someonesAdress);
+
+  /**
+   * Update the status of a user
+   * @param someonesAddress the ip address of the user to update
+   * @param status the new status of the user
+   */
+  public void updateUserStatus(InetAddress someonesAddress, int status){
+    User someone = getUserByIp(someonesAddress);
     if (someone != null){
       someone.setStatus(status);
     } else {
       System.out.println("User not found");
     }
   }
+
+    /**
+     * Check if a user is in the list
+     * @param nickname the nickname of the user to check
+     * @return true if the user is in the list, false otherwise
+     */
   public boolean UserIsInListByNickmane(String nickname) {
         for (User user : contacts) {
             if (user.getNickname().equals(nickname)) {
@@ -38,6 +55,12 @@ public class UserList {
         }
         return false;
       }
+
+  /**
+   * Check if a user is in the list
+   * @param ipAddress the ip address of the user to check
+   * @return true if the user is in the list, false otherwise
+   */
   public boolean UserIsInListByIp(InetAddress ipAddress) {
     for (User user : contacts) {
         if (user.getIp().equals(ipAddress)) {
@@ -46,8 +69,15 @@ public class UserList {
     }
     return false;
   }
-  public int updateNickname(InetAddress someonesAdress, String newNickname){
-    User someone = getUserByIp(someonesAdress);
+
+    /**
+     * Update the nickname of a user
+     * @param someonesAddress the ip address of the user to update
+     * @param newNickname the new nickname of the user
+     * @return 1 if the user is not in the list, 2 if the nickname is already taken, 0 if the nickname is successfully changed
+     */
+  public int updateNickname(InetAddress someonesAddress, String newNickname){
+    User someone = getUserByIp(someonesAddress);
     if (someone == null){
       return 1; // return code 1 is used when the user is not in the list
     }
@@ -57,18 +87,30 @@ public class UserList {
     someone.setNickname(newNickname);
     return 0; // return code 0 is used when the nickname is successfully changed
   }
-  public User getUserByIp(InetAddress ipAdress){
+
+  /**
+   * Get a user by his ip address
+   * @param ipAddress the ip address of the user to get
+   * @return the user with the given ip address, null if the user is not in the list
+   */
+  public User getUserByIp(InetAddress ipAddress){
     for (User user : contacts) {
-      if (user.getIp().equals(ipAdress)) {
+      if (user.getIp().equals(ipAddress)) {
           return user;
       }
   }
   return null;
   }
+
+    /**
+     * Get a user by his nickname
+     * @param nickname the nickname of the user to get
+     * @return the user with the given nickname, null if the user is not in the list
+     */
   public User getUserByNickname(String nickname){
     User matchingUser = null;
     for (User user : contacts){
-      if (nickname == user.getNickname()){
+      if (nickname.equals(user.getNickname())){
         if (matchingUser == null){
           matchingUser = user;
         } else{
@@ -79,6 +121,11 @@ public class UserList {
     }
     return matchingUser;
   }
+
+  /**
+   * Get the list of users online
+   * @return the list of users online
+   */
   public ArrayList<User> getUsersOnline(){
     ArrayList<User> usersOnline = new ArrayList<>();
     for (User user : getUserList()) {

@@ -86,7 +86,7 @@ public class Chat {
                     }
                 }
             } else {
-                JOptionPane.showMessageDialog(frame, status);
+                JOptionPane.showMessageDialog(frame, "error");
             }
         });
 
