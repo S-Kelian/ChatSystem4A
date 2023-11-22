@@ -4,8 +4,14 @@ import java.util.ArrayList;
 import java.net.InetAddress;
 
 public class UserList {
+
   private ArrayList<User> contacts;
   
+  public UserList(User me){
+    contacts = new ArrayList<User>();
+    contacts.add(me);
+  }
+
   public ArrayList<User> getUserList(){
     return contacts;
   }
@@ -52,6 +58,9 @@ public class UserList {
     return 0; // return code 0 is used when the nickname is successfully changed
   }
   public User getUserByIp(InetAddress ipAdress){
+    if (ipAdress == null){
+      throw new NullPointerException("IP adress is null");
+    }
     User matchingUser = null;
     for (User user : contacts){
       if (ipAdress == user.getIp()){

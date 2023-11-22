@@ -4,21 +4,19 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 
 import UDP.UDPSender;
 
 public class SystemApp {
-    private final User me;
+    private User me;
     private static UserList myUserList;
-
     private final UDPSender udpSender;
     private static SystemApp instance = null;
 
     private SystemApp() throws SocketException, UnknownHostException {
         this.me = new User("me", InetAddress.getLocalHost());
         this.udpSender = new UDPSender(me.getIp());
-        myUserList.addUser(me);
+        myUserList = new UserList(me);
     }
 
     public static SystemApp getInstance() throws SocketException, UnknownHostException {
