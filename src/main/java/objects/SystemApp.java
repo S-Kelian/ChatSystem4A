@@ -107,7 +107,7 @@ public class SystemApp {
         } else if (message.startsWith("update response from : ")) {
             // get the nickname of the user and add it to the list of users online if it is not already in it
             String nickname = message.substring(23);
-            if (!myUserList.getUserByIp(address).getNickname().equals(nickname) && !myUserList.UserIsInListByNickmane(nickname)) {
+            if (!myUserList.UserIsInListByNickmane(nickname)) {
                 User user = new User(nickname, address);
                 myUserList.addUser(user);
             } else {

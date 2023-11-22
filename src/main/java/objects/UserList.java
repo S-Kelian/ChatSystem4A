@@ -58,21 +58,12 @@ public class UserList {
     return 0; // return code 0 is used when the nickname is successfully changed
   }
   public User getUserByIp(InetAddress ipAdress){
-    if (ipAdress == null){
-      throw new NullPointerException("IP adress is null");
-    }
-    User matchingUser = null;
-    for (User user : contacts){
-      if (ipAdress == user.getIp()){
-        if (matchingUser == null){
-          matchingUser = user;
-        } else{
-          System.out.println("Multiple users with the same IP adress");
-          return matchingUser; // so far the problem of multiple users with same ip is noticed but not resolved
-        }
+    for (User user : contacts) {
+      if (user.getIp().equals(ipAdress)) {
+          return user;
       }
-    }
-    return matchingUser;
+  }
+  return null;
   }
   public User getUserByNickname(String nickname){
     User matchingUser = null;

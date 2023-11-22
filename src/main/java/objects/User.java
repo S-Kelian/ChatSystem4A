@@ -15,8 +15,8 @@ public class User{
         this.nickname = nickname;
         this.ip = ip;
     }
-
-    public User(InetAddress ip){
+    public User(InetAddress ip){ // used to give a first default name which will be the ip adress
+        this.nickname = ip.toString();
         this.ip = ip;
     }
 
@@ -34,26 +34,16 @@ public class User{
         this.status = status;
     }
     
-    // Exceptions in case of null values are handled
     public int getPort() {
-        if (this.port == 0){
-            throw new NullPointerException("Port is null");
-        }
         return this.port;
     }
     public int getStatus(){
         return this.status;
     }
     public String getNickname(){
-        if (this.nickname == null){
-            return "Unknown";
-        }
         return this.nickname;
     }
     public InetAddress getIp(){
-        if (this.ip == null){
-            throw new NullPointerException("IP is null");
-        }
         return this.ip;
     }
     
