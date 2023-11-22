@@ -4,23 +4,20 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.net.getHostAdress;
-import java.util.ArrayList;
 
 import UDP.UDPSender;
 
 public class SystemApp {
     private final User me;
-    private final ArrayList<User> usersList;
-
+    private final UserList myUserList;
     private final UDPSender udpSender;
     private static SystemApp instance = null;
 
     private SystemApp() throws SocketException, UnknownHostException {
         this.me = new User("me", InetAddress.getLocalHost());
+        System.out.println("My ip is " + me.getIp());
         this.udpSender = new UDPSender(me.getIp());
-        UserList myUserList = new UserList();
-        myUserList.addUser(me);
+        myUserList = new UserList(me);
     }
 
     public static SystemApp getInstance() throws SocketException, UnknownHostException {
@@ -30,38 +27,58 @@ public class SystemApp {
         return instance;
     }
 
+    /**
+     * Get the user of the system
+     * @return the user
+     */
     public User getMe() {
         return me;
     }
 
-    public String setMyUsername(String nickname){
-        String returnStatus;
-
-        if (nickname.equals("") || nickname == null) {
-            returnStatus = "Username can't be empty";
-            return returnStatus;
+    /**
+     * Get the userlist of the system
+     * @return the userlist
+     */
+    public UserList getMyUserList(){
+        return myUserList;
+    }
+    /**
+     * Set the nickname of the user and return an error code to let the user know if the operation was successful or not.
+     * @param nickname new nickname of the user
+     */
+    public int setMyUsername(String nickname){ // the success of the operation is returned as an int equal to 0 if success and 1 if the nickname is already taken and 2 if the nickname is not valid
+        // First we need to check if the user is using a valid nickname
+        if (nickname.equals("")) {
+            return 2;
         }
-        for (User user : usersList) {
-            if (user.getNickname().equals(nickname)) {
-                returnStatus = "Username already taken";
-                return returnStatus;
-            }
-        }
-        if (me.getNickname()!=null && !me.getNickname().equals(nickname)){
-            sendBroadcast("Nickname update : " + nickname );
+        // Now that we know that the nickname us valid, we need to check if it is already taken
+        if (myUserList.UserIsInListByNickmane(nickname)){
+            return 1;
         }
         me.setNickname(nickname);
-        returnStatus = "Success";
-        return returnStatus;
+        myUserList.updateNickname(me.getIp(), me.getNickname());
+        return 0;
     }
-    public void setSomeoneUsername(InetAddress address, String newNn){
-        User dude = getUserByIp(address);
-        // if the user is not in the list, we add it
-        if (dude == null){
-            dude = new User(newNn, address);
-            addUser(dude);
+
+    /**
+     * Set the nickname of a user of the userlist and return an error code to let the user know if the operation was successful or not.
+     * @param address of the user to update
+     * @param newNn new nickname of the user
+     */
+    public int setSomeoneUsername(InetAddress address, String newNn){ // the success of the operation is returned as an int equal to 0 if success and 1 if the user is not in the list and 2 if the nickname is already taken
+        // if the user is not in the list, we add him
+        if (!myUserList.UserIsInListByIp(address)){
+            myUserList.addUser(new User(newNn, address));
+            return 1;
         }
-        dude.setNickname(newNn);
+        // if the user is in the list but with a different nickname, we update his nickname if it is not already taken
+        if(!myUserList.UserIsInListByNickmane(newNn)){
+            myUserList.updateNickname(address, newNn);
+            return 0;
+        }
+        // if the user is in the list with the same nickname, we do nothing
+        System.out.println("Nickname already taken");
+        return 2;
     }
 
     /**
@@ -87,26 +104,22 @@ public class SystemApp {
         }
     }
 
-    public void setUserOffline(User user) {
-        user.setStatus(0);
-    }
-
     /**
      * Treatment of the received message
      * @param message received
      * @param address of the sender
      */
-    public void receiveMessage(String message, InetAddress address) {
-        if (address == me.getIp()) {
+    public void receiveMessage(String message, InetAddress address) throws UnknownHostException {
+        if (me.getIp().toString().contains(address.toString())) {
             return;
         }
-        if (message.startsWith("update request from : ")) {
+        if (message.startsWith("update request")) {
             String messageToSend = "update response from : " + me.getNickname();
             sendUnicast(messageToSend, address);
         } else if (message.startsWith("update response from : ")) {
             // get the nickname of the user and add it to the list of users online if it is not already in it
             String nickname = message.substring(23);
-            if (!getUserByIp(address).getNickname().equals(nickname) && !checkUsersListByName(nickname)) {
+            if (!myUserList.UserIsInListByNickmane(nickname)) {
                 User user = new User(nickname, address);
                 myUserList.addUser(user);
             } else {
@@ -117,7 +130,7 @@ public class SystemApp {
             String nickname = message.substring(18);
             setSomeoneUsername(address, nickname);
         } else if (message.equals("disconnect")) {
-            setUserOffline(getUserByIp(address));
+            myUserList.updateUserStatus(address, 0);
         } else {
             // if the message is not a command, we display it
             System.out.println(message);
@@ -128,47 +141,13 @@ public class SystemApp {
      * Send a broadcast message to all users to update the list of users online
      */
     public void usersListUpdateRoutine() {
-        String updateMessage = "update request from : " + me.getNickname();
+        String updateMessage = "update request";
         sendBroadcast(updateMessage);
     }
 
-    public boolean checkUsersListByName(String name) {
-        for (User user : usersList) {
-            if (user.getNickname().equals(name)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public User getUserByName(String name) {
-        for (User user : usersList) {
-            if (user.getNickname().equals(name)) {
-                return user;
-            }
-        }
-        return null;
-    }
-
-    public User getUserByIp(InetAddress ip) {
-        for (User user : usersList) {
-            if (user.getIp().equals(ip)) {
-                return user;
-            }
-        }
-        return null;
-    }
-
-    public ArrayList<User> getUsersOnline(){
-        ArrayList<User> usersOnline = new ArrayList<>();
-        for (User user : usersList) {
-            if (user.getStatus() != 0) {
-                usersOnline.add(user);
-            }
-        }
-        return usersOnline;
-    }
-
+    /**
+     * Disconnect the user from the chat
+     */
     public void disconnect() {
         sendBroadcast("disconnect");
         System.exit(0);

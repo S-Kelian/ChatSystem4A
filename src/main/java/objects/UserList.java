@@ -4,36 +4,135 @@ import java.util.ArrayList;
 import java.net.InetAddress;
 
 public class UserList {
-  private ArrayList<User> contacts;
+
+  private final ArrayList<User> contacts;
   
-  public ArrayList<User> getContacts(){
+  public UserList(User me){
+    contacts = new ArrayList<>();
+    contacts.add(me);
+  }
+
+  /**
+   * Return the list of users
+   * @return the list of users
+   */
+  public ArrayList<User> getUserList(){
     return contacts;
   }
 
-  public User getUserByIP(InetAddress ipAdress){
-    User matchingUser = null;
-    for (User user : contacts){
-      if (ipAdress == user.getIp()){
-        if (matchingUser == null){
-          matchingUser = user;
-        } else{
-          System.out.println("Multiple users with the same IP adress");
-          return matchingUser; // so far the problem of multiple users with same ip is noticed but not resolved
-        }
-      }
-    }
-    return matchingUser;
-  }
+    /**
+     * Add a user to the list
+     * @param someone the user to add
+     */
   public void addUser(User someone){
     contacts.add(someone);
   }
-  public void updateUserStatus(InetAddress someonesAdress, int status){
-    User someone = getUserByIP(someonesAdress);
+
+  /**
+   * Update the status of a user
+   * @param someonesAddress the ip address of the user to update
+   * @param status the new status of the user
+   */
+  public void updateUserStatus(InetAddress someonesAddress, int status){
+    User someone = getUserByIp(someonesAddress);
     if (someone != null){
       someone.setStatus(status);
     } else {
       System.out.println("User not found");
     }
   }
-  
+
+    /**
+     * Check if a user is in the list
+     * @param nickname the nickname of the user to check
+     * @return true if the user is in the list, false otherwise
+     */
+  public boolean UserIsInListByNickmane(String nickname) {
+        for (User user : contacts) {
+            if (user.getNickname().equals(nickname)) {
+                return true;
+            }
+        }
+        return false;
+      }
+
+  /**
+   * Check if a user is in the list
+   * @param ipAddress the ip address of the user to check
+   * @return true if the user is in the list, false otherwise
+   */
+  public boolean UserIsInListByIp(InetAddress ipAddress) {
+    for (User user : contacts) {
+        if (user.getIp().equals(ipAddress)) {
+            return true;
+        }
+    }
+    return false;
+  }
+
+    /**
+     * Update the nickname of a user
+     * @param someonesAddress the ip address of the user to update
+     * @param newNickname the new nickname of the user
+     * @return 1 if the user is not in the list, 2 if the nickname is already taken, 0 if the nickname is successfully changed
+     */
+  public int updateNickname(InetAddress someonesAddress, String newNickname){
+    User someone = getUserByIp(someonesAddress);
+    if (someone == null){
+      return 1; // return code 1 is used when the user is not in the list
+    }
+    if (UserIsInListByNickmane(newNickname)){
+      return 2; // return code 2 is used when the nickname is already taken
+    }
+    someone.setNickname(newNickname);
+    return 0; // return code 0 is used when the nickname is successfully changed
+  }
+
+  /**
+   * Get a user by his ip address
+   * @param ipAddress the ip address of the user to get
+   * @return the user with the given ip address, null if the user is not in the list
+   */
+  public User getUserByIp(InetAddress ipAddress){
+    for (User user : contacts) {
+      if (user.getIp().equals(ipAddress)) {
+          return user;
+      }
+  }
+  return null;
+  }
+
+    /**
+     * Get a user by his nickname
+     * @param nickname the nickname of the user to get
+     * @return the user with the given nickname, null if the user is not in the list
+     */
+  public User getUserByNickname(String nickname){
+    User matchingUser = null;
+    for (User user : contacts){
+      if (nickname.equals(user.getNickname())){
+        if (matchingUser == null){
+          matchingUser = user;
+        } else{
+          System.out.println("Multiple users with the same nickname");
+          return matchingUser; // so far the problem of multiple users with same nickname is noticed but not resolved
+        }
+      }
+    }
+    return matchingUser;
+  }
+
+  /**
+   * Get the list of users online
+   * @return the list of users online
+   */
+  public ArrayList<User> getUsersOnline(){
+    ArrayList<User> usersOnline = new ArrayList<>();
+    for (User user : getUserList()) {
+        if (user.getStatus() != 0) {
+            usersOnline.add(user);
+        }
+    }
+    return usersOnline;
+  }
 }

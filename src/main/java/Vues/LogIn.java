@@ -48,8 +48,8 @@ public class LogIn {
                 JOptionPane.showMessageDialog(frame, "Please enter a nickname");
                 return;
             }
-            String status = app.setMyUsername(nickname);
-            if(status == "Success"){
+            int status = app.setMyUsername(nickname);
+            if(status == 0){
                 frame.setVisible(false);
                 frame.dispose();
                 Chat chat;
@@ -62,7 +62,7 @@ public class LogIn {
                 }
                 chat.create();
             } else {
-                JOptionPane.showMessageDialog(frame, status);
+                JOptionPane.showMessageDialog(frame, "error");
             }
         });
 

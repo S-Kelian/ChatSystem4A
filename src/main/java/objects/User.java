@@ -15,35 +15,36 @@ public class User{
         this.nickname = nickname;
         this.ip = ip;
     }
-
-    public User(InetAddress ip){
+    public User(InetAddress ip){ // used to give a first default name which will be the ip adress
+        this.nickname = ip.toString();
         this.ip = ip;
     }
 
     public void setNickname(String nickname){
         this.nickname = nickname;
     }
-
+    
     public void setPort(int port){
         this.port = port;
     }
-
     public void setStatus(int status){
+        if (status < 0 || status > 3){
+            throw new IllegalArgumentException("Status must be between 0 and 3");
+        }
         this.status = status;
     }
-
-    public String getNickname(){
-        return this.nickname;
-    }
-
-    public InetAddress getIp(){
-        return this.ip;
-    }
-
+    
     public int getPort() {
         return this.port;
     }
     public int getStatus(){
         return this.status;
     }
+    public String getNickname(){
+        return this.nickname;
+    }
+    public InetAddress getIp(){
+        return this.ip;
+    }
+    
 }
