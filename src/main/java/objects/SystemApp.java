@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.net.getHostAdress;
 import java.util.ArrayList;
 
 import UDP.UDPSender;
@@ -17,9 +18,9 @@ public class SystemApp {
 
     private SystemApp() throws SocketException, UnknownHostException {
         this.me = new User("me", InetAddress.getLocalHost());
-        this.usersList = new ArrayList<>();
         this.udpSender = new UDPSender(me.getIp());
-        this.addUser(me);
+        UserList myUserList = new UserList();
+        myUserList.addUser(me);
     }
 
     public static SystemApp getInstance() throws SocketException, UnknownHostException {
@@ -31,9 +32,6 @@ public class SystemApp {
 
     public User getMe() {
         return me;
-    }
-    public ArrayList<User> getUsersList() {
-        return usersList;
     }
 
     public String setMyUsername(String nickname){
@@ -88,9 +86,7 @@ public class SystemApp {
         } catch (IOException ignored) {
         }
     }
-    public void addUser(User user) {
-        usersList.add(user);
-    }
+
     public void setUserOffline(User user) {
         user.setStatus(0);
     }
@@ -112,7 +108,7 @@ public class SystemApp {
             String nickname = message.substring(23);
             if (!getUserByIp(address).getNickname().equals(nickname) && !checkUsersListByName(nickname)) {
                 User user = new User(nickname, address);
-                addUser(user);
+                myUserList.addUser(user);
             } else {
                 // if the user is already in the list, we update his nickname
                 setSomeoneUsername(address, nickname);
