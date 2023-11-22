@@ -34,7 +34,7 @@ public class Chat {
         JPanel panelNickname = new JPanel();
         JLabel titleLabel = new JLabel("Welcome " + app.getMe().getNickname());
         JPanel panelUsersOnline = new JPanel();
-        JLabel labelUsersOnline = new JLabel("Users online : " + app.getUsersOnline().size());
+        JLabel labelUsersOnline = new JLabel("Users online : " + app.getMyUserList().getUsersOnline().size());
         JButton refresh = new JButton("Refresh");
         JPanel profilePanel = new JPanel();
         JButton rename = new JButton("Rename");
@@ -65,7 +65,7 @@ public class Chat {
             app.usersListUpdateRoutine();
             usersOnline.clear();
             panelUsersOnline.removeAll();
-            labelUsersOnline.setText("Users online : " + app.getUsersOnline().size());
+            labelUsersOnline.setText("Users online : " + app.getMyUserList().getUsersOnline().size());
             panelUsersOnline.add(labelUsersOnline , BorderLayout.PAGE_START);
             panelUsersOnline.add(refresh, BorderLayout.PAGE_END);
             createLabelsOfUsers(panelUsersOnline);
@@ -77,8 +77,8 @@ public class Chat {
             // Rename the user
             app.usersListUpdateRoutine();
             String newNickname = JOptionPane.showInputDialog(frame, "Enter your new nickname");
-            String status = app.setMyUsername(newNickname);
-            if (status.equals("Success")) {
+            int status = app.setMyUsername(newNickname);
+            if (status == 0) {
                 titleLabel.setText("Welcome " + app.getMe().getNickname());
                 for (JLabel userLabel : usersOnline) {
                     if (userLabel.getText().contains("(you)")) {
@@ -107,11 +107,11 @@ public class Chat {
 
         JPanel usersOnlineList= new JPanel();
         usersOnlineList.setLayout(new BoxLayout(usersOnlineList, BoxLayout.Y_AXIS));
-        for (int i = 0; i < app.getUsersOnline().size(); i++) {
-            JLabel userLabel = new JLabel(app.getUsersOnline().get(i).getNickname());
+        for (int i = 0; i < app.getMyUserList().getUsersOnline().size(); i++) {
+            JLabel userLabel = new JLabel(app.getMyUserList().getUsersOnline().get(i).getNickname());
 
             // Add "(you)" to the label of the current user
-            if (app.getUsersOnline().get(i).getNickname().equals(app.getMe().getNickname())) {
+            if (app.getMyUserList().getUsersOnline().get(i).getNickname().equals(app.getMe().getNickname())) {
                 userLabel.setText(userLabel.getText() + " (you)");
             }
 
