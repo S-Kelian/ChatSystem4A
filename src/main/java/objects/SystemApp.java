@@ -1,9 +1,8 @@
 package objects;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.net.*;
+import java.util.Enumeration;
 
 import UDP.UDPSender;
 
@@ -14,8 +13,9 @@ public class SystemApp {
     private static SystemApp instance = null;
 
     private SystemApp() throws SocketException, UnknownHostException {
-        this.me = new User("me", InetAddress.getLocalHost());
-        System.out.println("My ip is " + me.getIp());
+        String ip = getMyIp();
+        InetAddress address = InetAddress.getByName(ip);
+        this.me = new User("me", address);
         this.udpSender = new UDPSender(me.getIp());
         myUserList = new UserList(me);
     }
@@ -151,5 +151,26 @@ public class SystemApp {
     public void disconnect() {
         sendBroadcast("disconnect");
         System.exit(0);
+    }
+
+    public String getMyIp() throws SocketException {
+        try {
+            Enumeration<NetworkInterface> nics = NetworkInterface
+                    .getNetworkInterfaces();
+            while (nics.hasMoreElements()) {
+                NetworkInterface nic = nics.nextElement();
+                Enumeration<InetAddress> addrs = nic.getInetAddresses();
+                while (addrs.hasMoreElements()) {
+                    InetAddress addr = addrs.nextElement();
+                    if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
+                        System.out.println(addr.getHostAddress());
+                        return addr.getHostAddress();
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
