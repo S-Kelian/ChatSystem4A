@@ -12,12 +12,26 @@ public class SystemApp {
     private final UDPSender udpSender;
     private static SystemApp instance = null;
 
+    private final String os;
+
     private SystemApp() throws SocketException, UnknownHostException {
-        String ip = getMyIp();
-        InetAddress address = InetAddress.getByName(ip);
+        os = System.getProperty("os.name");
+        InetAddress address = null;
+        if (os.equals("Linux")) {
+            System.out.println("Linux");
+            String ip = getMyIpLinux();
+            address = InetAddress.getByName(ip);
+        } else if (os.startsWith("Windows")) {
+            System.out.println("Windows");
+            address = InetAddress.getLocalHost();
+        } else {
+            System.out.println("OS not supported");
+        }
+
         this.me = new User("me", address);
         this.udpSender = new UDPSender(me.getIp());
         myUserList = new UserList(me);
+
     }
 
     public static SystemApp getInstance() throws SocketException, UnknownHostException {
@@ -153,7 +167,7 @@ public class SystemApp {
         System.exit(0);
     }
 
-    public String getMyIp() throws SocketException {
+    public String getMyIpLinux() throws SocketException {
         try {
             Enumeration<NetworkInterface> nics = NetworkInterface
                     .getNetworkInterfaces();
@@ -173,4 +187,5 @@ public class SystemApp {
         }
         return null;
     }
+
 }
