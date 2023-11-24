@@ -12,21 +12,8 @@ public class SystemApp {
     private final UDPSender udpSender;
     private static SystemApp instance = null;
 
-    private final String os;
-
     private SystemApp() throws SocketException, UnknownHostException {
-        os = System.getProperty("os.name");
-        InetAddress address = null;
-        if (os.equals("Linux")) {
-            System.out.println("Linux");
-            String ip = getMyIpLinux();
-            address = InetAddress.getByName(ip);
-        } else if (os.startsWith("Windows")) {
-            System.out.println("Windows");
-            address = InetAddress.getLocalHost();
-        } else {
-            System.out.println("OS not supported");
-        }
+        InetAddress address = getMyIp();
 
         this.me = new User("me", address);
         this.udpSender = new UDPSender(me.getIp());
@@ -71,6 +58,7 @@ public class SystemApp {
         }
         me.setNickname(nickname);
         myUserList.updateNickname(me.getIp(), me.getNickname());
+        sendBroadcast("Nickname update : " + nickname);
         return 0;
     }
 
@@ -170,8 +158,12 @@ public class SystemApp {
         System.exit(0);
     }
 
-    public String getMyIpLinux() throws SocketException {
-        try {
+    public InetAddress getMyIp() throws SocketException, UnknownHostException {
+
+        String os = System.getProperty("os.name");
+        InetAddress address = null;
+        if (os.equals("Linux")) {
+            System.out.println("Linux");
             Enumeration<NetworkInterface> nics = NetworkInterface
                     .getNetworkInterfaces();
             while (nics.hasMoreElements()) {
@@ -181,14 +173,19 @@ public class SystemApp {
                     InetAddress addr = addrs.nextElement();
                     if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
                         System.out.println(addr.getHostAddress());
-                        return addr.getHostAddress();
+                        address = InetAddress.getByName(addr.getHostAddress());
+                        break;
                     }
                 }
             }
-        } catch (SocketException e) {
-            e.printStackTrace();
+        } else if (os.startsWith("Windows")) {
+            System.out.println("Windows");
+            address = InetAddress.getLocalHost();
+        } else {
+            System.out.println("OS not supported");
         }
-        return null;
+
+        return address;
     }
 
 }
