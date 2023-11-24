@@ -23,11 +23,7 @@ With the current version of the Chat-System you will be able to :
 - Change your pseudo and inform other people on the network of this change.
 - Update the user list in the process when someone changes his nickname, when you press the "Refresh" button and once a minute automatically. (Only the refresh button causes the view to be actualised)
 
-First you will need to clone the repository on your machine using this command:
-
-```bash
-git clone https://github.com/insa-4ir-chatsystem/chatsystem-sebaici-zenou-truchot.git
-```
+First you will need to extract the downloaded zip/tar.gz file and open a terminal where you extracted it.
 
 Use the following command lines on your machine to launch the app:
 
