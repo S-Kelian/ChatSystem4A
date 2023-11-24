@@ -22,30 +22,12 @@ public class Main {
         }
         LogIn logIn = new LogIn();
         logIn.create();
-        /*
-        switch (args[0]){
-            case "s":
-                UDPListener listener = new UDPListener();
-                listener.start();
-                break;
-            case "c":
-                int port = 4889;
-                UDPSender sender = new UDPSender (InetAddress.getLocalHost(), port);
-                String msg = "Connection from "+ InetAddress.getLocalHost() + " via le port " + port;
-                sender.broadcast(msg, InetAddress.getByName("255.255.255.255"));
-                break;
-        }
-        */
-
-
-        /*
+        
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 app.usersListUpdateRoutine();
             }
-        }, 0, 10000);
-*/
-
+        }, 0, 60000);
     }
 }
