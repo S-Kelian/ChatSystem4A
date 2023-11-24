@@ -133,11 +133,14 @@ public class SystemApp {
         } else if (message.startsWith("update response from : ")) {
             // get the nickname of the user and add it to the list of users online if it is not already in it
             String nickname = message.substring(23);
-            if (!myUserList.UserIsInListByNickmane(nickname)) {
+            if (!myUserList.UserIsInListByIp(address)) {
                 User user = new User(nickname, address);
                 myUserList.addUser(user);
             } else {
-                // if the user is already in the list, we update his nickname
+                // if the user is already in the list, we update his nickname if it is different
+                if (myUserList.getUserByIp(address).getNickname().equals(nickname)) {
+                    return;
+                }
                 setSomeoneUsername(address, nickname);
             }
         } else if (message.startsWith("Nickname update : ")) {
