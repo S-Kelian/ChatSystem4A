@@ -14,6 +14,7 @@ public class User{
     public User(String nickname, InetAddress ip){
         this.nickname = nickname;
         this.ip = ip;
+
     }
     public User(InetAddress ip){ // used to give a first default name which will be the ip adress
         this.nickname = ip.toString();

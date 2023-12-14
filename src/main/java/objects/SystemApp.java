@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.*;
 import java.util.Enumeration;
 
-import UDP.UDPSender;
+import network.UDPSender;
 
 public class SystemApp {
     private final User me;
@@ -89,7 +89,7 @@ public class SystemApp {
      */
     public void sendBroadcast(String message) {
         try {
-            udpSender.sendBroadcast(message, InetAddress.getByName("255.255.255.255"));
+            udpSender.send(message, InetAddress.getByName("255.255.255.255"), true);
         } catch (IOException ignored) {
         }
     }
@@ -101,7 +101,7 @@ public class SystemApp {
      */
     public void sendUnicast(String message, InetAddress address) {
         try {
-            udpSender.sendUnicast(message, address);
+            udpSender.send(message, address, false);
         } catch (IOException ignored) {
         }
     }
