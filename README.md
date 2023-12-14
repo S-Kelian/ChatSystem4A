@@ -21,7 +21,7 @@ With the current version of the Chat-System you will be able to :
 - Use a graphical interface.
 - Create a profile by setting a pseudo.
 - Change your pseudo and inform other people on the network of this change.
-- Update the user list in the process when someone changes his nickname, when you press the "Refresh" button and once a minute automatically. (Only the refresh button causes the view to be actualised)
+- Update the user list in the process when someone changes his nickname, when you press the "Refresh" button and once a minute automatically. (Only the refresh button causes the views to be actualised)
 
 First you will need to extract the downloaded zip/tar.gz file and open a terminal where you extracted it.
 

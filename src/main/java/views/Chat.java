@@ -1,4 +1,4 @@
-package Vues;
+package views;
 
 import java.awt.BorderLayout;
 import java.net.SocketException;

@@ -47,7 +47,7 @@ public class SystemApp {
      * Set the nickname of the user and return an error code to let the user know if the operation was successful or not.
      * @param nickname new nickname of the user
      */
-    public int setMyUsername(String nickname){ // the success of the operation is returned as an int equal to 0 if success and 1 if the nickname is already taken and 2 if the nickname is not valid
+    public synchronized int setMyUsername(String nickname){ // the success of the operation is returned as an int equal to 0 if success and 1 if the nickname is already taken and 2 if the nickname is not valid
         // First we need to check if the user is using a valid nickname
         if (nickname.equals("")) {
             return 2;
@@ -67,7 +67,7 @@ public class SystemApp {
      * @param address of the user to update
      * @param newNn new nickname of the user
      */
-    public int setSomeoneUsername(InetAddress address, String newNn){ // the success of the operation is returned as an int equal to 0 if success and 1 if the user is not in the list and 2 if the nickname is already taken
+    public synchronized int setSomeoneUsername(InetAddress address, String newNn){ // the success of the operation is returned as an int equal to 0 if success and 1 if the user is not in the list and 2 if the nickname is already taken
         // if the user is not in the list, we add him
         if (!myUserList.UserIsInListByIp(address)){
             myUserList.addUser(new User(newNn, address));
@@ -111,7 +111,7 @@ public class SystemApp {
      * @param message received
      * @param address of the sender
      */
-    public void receiveMessage(String message, InetAddress address) throws UnknownHostException {
+    public synchronized void receiveMessage(String message, InetAddress address) throws UnknownHostException {
         if (me.getIp().toString().contains(address.toString())) {
             return;
         }
