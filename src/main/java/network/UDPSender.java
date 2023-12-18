@@ -1,6 +1,8 @@
 package network;
 
-import java.io.IOException;
+import objects.UDPMessage;
+
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -16,10 +18,17 @@ public class UDPSender {
         socket = new DatagramSocket(myPort, adresse);
     }
     
-    public void send( String message, InetAddress address, boolean broadcast) throws IOException {
+    public void send(UDPMessage msg) throws IOException {
         socket = new DatagramSocket();
-        socket.setBroadcast(broadcast);
-        byte[] buffer = message.getBytes();
+        socket.setBroadcast(msg.isBroadcast());
+
+        InetAddress address = msg.getReceiver();
+        final ByteArrayOutputStream byteArrayOutStream = new ByteArrayOutputStream(6400);
+        final ObjectOutput objOut = new ObjectOutputStream(byteArrayOutStream);
+        objOut.writeObject(msg);
+        objOut.close();
+
+        byte[] buffer = byteArrayOutStream.toByteArray();
         //default receiver port
         int otherPort = 49000;
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, otherPort);

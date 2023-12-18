@@ -1,16 +1,19 @@
 package objects;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 
-public class UDPMessage implements Message{
+public class UDPMessage implements Message, Serializable {
 
-private enum TYPEUDPMESSAGE {Request, Response, Disconection, Rename};
+    private enum TYPEUDPMESSAGE {
+        Request, Response, Disconection, Rename
+    }
 
     private final String content;
     private final InetAddress sender;
     private final InetAddress receiver;
     private final boolean broadcast;
-    private TYPEUDPMESSAGE type;
+    private final TYPEUDPMESSAGE type;
 
     public UDPMessage(String content, InetAddress sender, InetAddress receiver, TYPEUDPMESSAGE type, boolean broadcast) {
         this.content = content;
@@ -21,23 +24,23 @@ private enum TYPEUDPMESSAGE {Request, Response, Disconection, Rename};
     }
 
     public String getContent() {
-        return content;
+        return this.content;
     }
 
     public InetAddress getSender() {
-        return sender;
+        return this.sender;
     }
 
     public InetAddress getReceiver() {
-        return receiver;
+        return this.receiver;
     }
 
     public boolean isBroadcast() {
-        return broadcast;
+        return this.broadcast;
     }
 
     public TYPEUDPMESSAGE getType() {
-        return type;
+        return this.type;
     }
 
     public String toString() {
