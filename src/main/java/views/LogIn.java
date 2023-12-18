@@ -55,9 +55,7 @@ public class LogIn {
                 Chat chat;
                 try {
                     chat = new Chat();
-                } catch (SocketException ex) {
-                    throw new RuntimeException(ex);
-                } catch (UnknownHostException ex) {
+                } catch (SocketException | UnknownHostException ex) {
                     throw new RuntimeException(ex);
                 }
                 chat.create();

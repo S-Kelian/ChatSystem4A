@@ -11,16 +11,16 @@ public class UDPSender {
     private static DatagramSocket socket = null;
 
     public UDPSender( InetAddress adresse) throws SocketException {
-        //port d'envoi par défaut
+        //default sender port
         int myPort = 49001;
         socket = new DatagramSocket(myPort, adresse);
     }
     
-    public void send( String broadcastMessage, InetAddress address, boolean broadcast) throws IOException {
+    public void send( String message, InetAddress address, boolean broadcast) throws IOException {
         socket = new DatagramSocket();
         socket.setBroadcast(broadcast);
-        byte[] buffer = broadcastMessage.getBytes();
-        //port de réception par défaut
+        byte[] buffer = message.getBytes();
+        //default receiver port
         int otherPort = 49000;
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, otherPort);
         socket.send(packet);
