@@ -1,4 +1,4 @@
-package network;
+package Network;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -6,7 +6,7 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-import objects.SystemApp;
+import Objects.SystemApp;
 
 public class UDPListener {
     Thread thread;

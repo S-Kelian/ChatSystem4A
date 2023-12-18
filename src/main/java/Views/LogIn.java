@@ -1,4 +1,4 @@
-package views;
+package Views;
 
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -10,7 +10,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import objects.SystemApp;
+import Objects.SystemApp;
 
 public class LogIn {
 
