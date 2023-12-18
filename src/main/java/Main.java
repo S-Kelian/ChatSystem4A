@@ -1,10 +1,11 @@
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import network.UDPListener;
-import objects.SystemApp;
 import views.LogIn;
+import objects.SystemApp;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -13,6 +14,19 @@ public class Main {
         SystemApp app = SystemApp.getInstance();
         app.usersListUpdateRoutine();
         UDPListener listener = new UDPListener();
+        listener.addObserver(new UDPListener.Observer() {
+            @Override
+            public void handle(String message, java.net.InetAddress address) {
+                System.out.println("Message reçu : " + message + " de " + address);
+            }
+        });
+
+        listener.addObserver(new UDPListener.Observer() {
+            @Override
+            public void handle(String message, java.net.InetAddress address) throws UnknownHostException {
+                app.receiveMessage(message, address);
+            }
+        });
         listener.start();
         // Delay to let the listener start
         try {
@@ -22,7 +36,7 @@ public class Main {
         }
         LogIn logIn = new LogIn();
         logIn.create();
-        
+
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
