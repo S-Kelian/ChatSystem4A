@@ -2,9 +2,9 @@ import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import Network.UDPListener;
 import Objects.SystemApp;
-import Views.LogIn;
+import network.UDPListener;
+import views.LogIn;
 
 public class Main {
     public static void main(String[] args) throws IOException {

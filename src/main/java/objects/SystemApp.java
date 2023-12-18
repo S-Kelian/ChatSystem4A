@@ -8,7 +8,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
-import Network.UDPSender;
+import network.UDPSender;
 
 public class SystemApp {
     private final User me;
