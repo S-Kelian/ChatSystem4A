@@ -13,7 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import Objects.SystemApp;
+import objects.SystemApp;
 
 public class Chat {
 

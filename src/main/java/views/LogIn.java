@@ -10,7 +10,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import Objects.SystemApp;
+import objects.SystemApp;
 
 public class LogIn {
 
