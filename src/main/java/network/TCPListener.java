@@ -8,7 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 
-public class TCPListener {
+public class TCPListener extends Thread{
 
     private ServerSocket serverSocket;
     private Socket clientSocket;
@@ -22,29 +22,7 @@ public class TCPListener {
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         String greeting = in.readLine();
         System.out.println(greeting);
-
-        if ("hello server".equals(greeting)) {
-            out.println("hello client");
-        }
-        else {
-            out.println("unrecognised greeting");
-        }
-    }
-
-    public void stop() throws IOException {
-        in.close();
-        out.close();
-        clientSocket.close();
-        serverSocket.close();
-    }
-    
-    public static void main(String[] args) {
-        TCPListener server=new TCPListener();
-        try {
-            server.start(6666);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        
     }
 }
 
