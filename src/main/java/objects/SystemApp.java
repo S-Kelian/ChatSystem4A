@@ -22,7 +22,7 @@ public class SystemApp {
     private SystemApp() throws SocketException, UnknownHostException {
         InetAddress address = getMyIp();
 
-        this.me = new User("me", address);
+        this.me = new User(address.toString(), address);
         this.udpSender = new UDPSender(me.getIp());
         myUserList = new UserList(me);
 
