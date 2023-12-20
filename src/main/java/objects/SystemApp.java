@@ -8,6 +8,9 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
+import customExceptions.UserNotFoundException;
+import customExceptions.UsernameEmptyException;
+import customExceptions.UsernameUsedException;
 import network.UDPSender;
 
 public class SystemApp {
@@ -51,40 +54,40 @@ public class SystemApp {
      * Set the nickname of the user and return an error code to let the user know if the operation was successful or not.
      * @param nickname new nickname of the user
      */
-    public int setMyUsername(String nickname){ // the success of the operation is returned as an int equal to 0 if success and 1 if the nickname is already taken and 2 if the nickname is not valid
+    public void setMyUsername(String nickname) throws UsernameEmptyException, UsernameUsedException { // the success of the operation is returned as an int equal to 0 if success and 1 if the nickname is already taken and 2 if the nickname is not valid
         // First we need to check if the user is using a valid nickname
         if (nickname.isEmpty()) {
-            return 2;
+            throw new UsernameEmptyException("Nickname is empty");
         }
         // Now that we know that the nickname us valid, we need to check if it is already taken
         if (myUserList.UserIsInListByNickmane(nickname)){
-            return 1;
+            throw new UsernameUsedException("Nickname already taken");
         }
         me.setNickname(nickname);
         myUserList.updateNickname(me.getIp(), me.getNickname());
         sendBroadcast("Nickname update : " + nickname, UDPMessage.TYPEUDPMESSAGE.RENAME);
-        return 0;
     }
 
     /**
      * Set the nickname of a user of the userlist and return an error code to let the user know if the operation was successful or not.
+     *
      * @param address of the user to update
-     * @param newNn new nickname of the user
+     * @param newNn   new nickname of the user
      */
-    public int setSomeoneUsername(InetAddress address, String newNn){ // the success of the operation is returned as an int equal to 0 if success and 1 if the user is not in the list and 2 if the nickname is already taken
+    public void setSomeoneUsername(InetAddress address, String newNn) throws UserNotFoundException, UsernameUsedException { // the success of the operation is returned as an int equal to 0 if success and 1 if the user is not in the list and 2 if the nickname is already taken
         // if the user is not in the list, we add him
         if (!myUserList.UserIsInListByIp(address)){
             myUserList.addUser(new User(newNn, address));
-            return 1;
+            throw new UserNotFoundException("error 404 user not found");
         }
         // if the user is in the list but with a different nickname, we update his nickname if it is not already taken
         if(!myUserList.UserIsInListByNickmane(newNn)){
             myUserList.updateNickname(address, newNn);
-            return 0;
+            return;
         }
         // if the user is in the list with the same nickname, we do nothing
         System.out.println("Nickname already taken");
-        return 2;
+        throw new UsernameUsedException("Nickname already taken");
     }
 
     /**
@@ -117,7 +120,7 @@ public class SystemApp {
      * Treatment of the received message
      * @param message received
      */
-    public void receiveMessage(UDPMessage message) {
+    public void receiveMessage(UDPMessage message) throws UserNotFoundException, UsernameUsedException {
         if (message.getSender().equals(me.getIp())) {
             return;
         }

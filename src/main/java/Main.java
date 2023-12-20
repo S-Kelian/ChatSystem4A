@@ -1,11 +1,12 @@
+import customExceptions.UserNotFoundException;
+import customExceptions.UsernameUsedException;
+import network.UDPListener;
+import objects.SystemApp;
+import views.LogIn;
+
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import network.UDPListener;
-import views.LogIn;
-import objects.SystemApp;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -16,7 +17,13 @@ public class Main {
         UDPListener listener = new UDPListener();
         listener.addObserver((message) -> System.out.println(message.toString()));
 
-        listener.addObserver((message) -> app.receiveMessage(message));
+        listener.addObserver((message) -> {
+            try {
+                app.receiveMessage(message);
+            } catch (UserNotFoundException | UsernameUsedException e) {
+                System.err.println(e.getMessage());
+            }
+        });
         listener.start();
 
         LogIn logIn = new LogIn();
