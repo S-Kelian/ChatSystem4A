@@ -14,9 +14,9 @@ public class Main {
         SystemApp app = SystemApp.getInstance();
         app.usersListUpdateRoutine();
         UDPListener listener = new UDPListener();
-        listener.addObserver((message, address) -> System.out.println("Message reçu : " + message + " de " + address));
+        listener.addObserver((message) -> System.out.println(message.toString()));
 
-        listener.addObserver(app::receiveMessage);
+        listener.addObserver((message) -> app.receiveMessage(message));
         listener.start();
 
         LogIn logIn = new LogIn();

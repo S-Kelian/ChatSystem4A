@@ -5,8 +5,8 @@ import java.net.InetAddress;
 
 public class UDPMessage implements Message, Serializable {
 
-    private enum TYPEUDPMESSAGE {
-        Request, Response, Disconection, Rename
+    public enum TYPEUDPMESSAGE {
+        REQUEST, RESPONSE, DISCONNECTION, RENAME
     }
 
     private final String content;
@@ -45,7 +45,8 @@ public class UDPMessage implements Message, Serializable {
 
     public String toString() {
         return "UDPMessage{" +
-                "content='" + content + '\'' +
+                "content='" + content + "'" +
+                ", type='" + type + "'" +
                 ", sender=" + sender +
                 ", receiver=" + receiver +
                 ", broadcast=" + broadcast +

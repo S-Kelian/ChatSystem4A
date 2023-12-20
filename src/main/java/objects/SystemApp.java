@@ -53,7 +53,7 @@ public class SystemApp {
      */
     public int setMyUsername(String nickname){ // the success of the operation is returned as an int equal to 0 if success and 1 if the nickname is already taken and 2 if the nickname is not valid
         // First we need to check if the user is using a valid nickname
-        if (nickname.equals("")) {
+        if (nickname.isEmpty()) {
             return 2;
         }
         // Now that we know that the nickname us valid, we need to check if it is already taken
@@ -62,7 +62,7 @@ public class SystemApp {
         }
         me.setNickname(nickname);
         myUserList.updateNickname(me.getIp(), me.getNickname());
-        sendBroadcast("Nickname update : " + nickname);
+        sendBroadcast("Nickname update : " + nickname, UDPMessage.TYPEUDPMESSAGE.RENAME);
         return 0;
     }
 
@@ -89,23 +89,26 @@ public class SystemApp {
 
     /**
      * Send a message to all users
-     * @param message to send
+     * @param content of the message
      */
-    public void sendBroadcast(String message) {
+    public void sendBroadcast(String content, UDPMessage.TYPEUDPMESSAGE type) {
         try {
-            udpSender.send(message, InetAddress.getByName("255.255.255.255"), true);
+            UDPMessage message = new UDPMessage(content, me.getIp(), InetAddress.getByName("255.255.255.255"), type, true);
+            udpSender.send(message);
         } catch (IOException ignored) {
         }
     }
 
     /**
      * Send a message to a specific user
-     * @param message to send
-     * @param address of the user
+     * @param content of the message
+     * @param address of the receiver
+     * @param type of the message
      */
-    public void sendUnicast(String message, InetAddress address) {
+    public void sendUnicast(String content, InetAddress address, UDPMessage.TYPEUDPMESSAGE type) {
         try {
-            udpSender.send(message, address, false);
+            UDPMessage message = new UDPMessage(content, me.getIp(), address, type, false);
+            udpSender.send(message);
         } catch (IOException ignored) {
         }
     }
@@ -113,36 +116,38 @@ public class SystemApp {
     /**
      * Treatment of the received message
      * @param message received
-     * @param address of the sender
      */
-    public void receiveMessage(String message, InetAddress address) throws UnknownHostException {
-        if (me.getIp().toString().contains(address.toString())) {
+    public void receiveMessage(UDPMessage message) {
+        if (message.getSender().equals(me.getIp())) {
             return;
         }
-        if (message.startsWith("update request")) {
-            String messageToSend = "update response from : " + me.getNickname();
-            sendUnicast(messageToSend, address);
-        } else if (message.startsWith("update response from : ")) {
-            // get the nickname of the user and add it to the list of users online if it is not already in it
-            String nickname = message.substring(23);
-            if (!myUserList.UserIsInListByIp(address)) {
-                User user = new User(nickname, address);
-                myUserList.addUser(user);
-            } else {
-                // if the user is already in the list, we update his nickname if it is different
-                if (myUserList.getUserByIp(address).getNickname().equals(nickname)) {
-                    return;
+        switch (message.getType()) {
+            case REQUEST:
+                String messageToSend = "update response from : " + me.getNickname();
+                sendUnicast(messageToSend, message.getReceiver(), UDPMessage.TYPEUDPMESSAGE.RESPONSE);
+                break;
+            case RESPONSE:
+                // get the nickname of the user and add it to the list of users online if it is not already in it
+                String nickname = message.getContent().substring(23);
+                InetAddress address = message.getSender();
+                if (!myUserList.UserIsInListByIp(address)) {
+                    User user = new User(nickname, address);
+                    myUserList.addUser(user);
+                } else {
+                    // if the user is already in the list, we update his nickname if it is different and update his status
+                    myUserList.updateUserStatus(address, 1);
+                    if (myUserList.getUserByIp(address).getNickname().equals(nickname)) {
+                        return;
+                    }
+                    setSomeoneUsername(address, nickname);
                 }
-                setSomeoneUsername(address, nickname);
-            }
-        } else if (message.startsWith("Nickname update : ")) {
-            String nickname = message.substring(18);
-            setSomeoneUsername(address, nickname);
-        } else if (message.equals("disconnect")) {
-            myUserList.updateUserStatus(address, 0);
-        } else {
-            // if the message is not a command, we display it
-            System.out.println(message);
+                break;
+            case DISCONNECTION:
+                myUserList.updateUserStatus(message.getSender(), 0);
+                break;
+            case RENAME:
+                setSomeoneUsername(message.getSender(), message.getContent().substring(18));
+                break;
         }
     }
 
@@ -151,14 +156,14 @@ public class SystemApp {
      */
     public void usersListUpdateRoutine() {
         String updateMessage = "update request";
-        sendBroadcast(updateMessage);
+        sendBroadcast(updateMessage, UDPMessage.TYPEUDPMESSAGE.REQUEST);
     }
 
     /**
      * Disconnect the user from the chat
      */
     public void disconnect() {
-        sendBroadcast("disconnect");
+        sendBroadcast("disconnect", UDPMessage.TYPEUDPMESSAGE.DISCONNECTION);
         System.exit(0);
     }
 
