@@ -113,6 +113,7 @@ public class SystemApp {
             UDPMessage message = new UDPMessage(content, me.getIp(), address, type, false);
             udpSender.send(message);
         } catch (IOException ignored) {
+            System.out.println("Error while sending message");
         }
     }
 
@@ -127,7 +128,7 @@ public class SystemApp {
         switch (message.getType()) {
             case REQUEST:
                 String messageToSend = "update response from : " + me.getNickname();
-                sendUnicast(messageToSend, message.getReceiver(), UDPMessage.TYPEUDPMESSAGE.RESPONSE);
+                sendUnicast(messageToSend, message.getSender(), UDPMessage.TYPEUDPMESSAGE.RESPONSE);
                 break;
             case RESPONSE:
                 // get the nickname of the user and add it to the list of users online if it is not already in it
