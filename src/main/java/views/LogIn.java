@@ -10,6 +10,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import customExceptions.UsernameEmptyException;
+import customExceptions.UsernameUsedException;
 import objects.SystemApp;
 
 public class LogIn {
@@ -44,23 +46,20 @@ public class LogIn {
         send.addActionListener(e -> {
             app.usersListUpdateRoutine();
             String nickname = tf.getText();
-            if (nickname.equals("")) {
+            if (nickname.isEmpty()) {
                 JOptionPane.showMessageDialog(frame, "Please enter a nickname");
                 return;
             }
-            int status = app.setMyUsername(nickname);
-            if(status == 0){
+            try {
+                app.setMyUsername(nickname);
                 frame.setVisible(false);
                 frame.dispose();
-                Chat chat;
-                try {
-                    chat = new Chat();
-                } catch (SocketException | UnknownHostException ex) {
-                    throw new RuntimeException(ex);
-                }
+                Chat chat = new Chat();
                 chat.create();
-            } else {
-                JOptionPane.showMessageDialog(frame, "error");
+            } catch (UsernameEmptyException | UsernameUsedException ex) {
+                JOptionPane.showMessageDialog(frame, ex.getMessage());
+            } catch (SocketException | UnknownHostException ex) {
+                ex.printStackTrace();
             }
         });
 

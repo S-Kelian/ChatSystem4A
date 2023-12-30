@@ -1,6 +1,11 @@
 package network;
 
+import objects.Message;
+import objects.UDPMessage;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +14,7 @@ import java.util.List;
 public class UDPListener extends Thread{
 
     public interface Observer {
-        void handle(String message , InetAddress address) throws UnknownHostException;
+        void handle(UDPMessage message) throws UnknownHostException;
     }
 
     public void addObserver(Observer observer) {
@@ -35,15 +40,19 @@ public class UDPListener extends Thread{
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 
                 socket.receive(packet);
-                String message = new String(packet.getData(), 0, packet.getLength());
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buffer);
+                ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+                UDPMessage message = (UDPMessage) objectInputStream.readObject();
 
                 synchronized (this.observers) {
                     for (Observer observer : observers) {
-                        observer.handle(message, packet.getAddress());
+                        observer.handle(message);
                     }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
             }
         }
     }

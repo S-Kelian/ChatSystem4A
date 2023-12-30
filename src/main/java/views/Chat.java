@@ -13,6 +13,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import customExceptions.UsernameEmptyException;
+import customExceptions.UsernameUsedException;
 import objects.SystemApp;
 
 public class Chat {
@@ -82,16 +84,16 @@ public class Chat {
             // Rename the user
             app.usersListUpdateRoutine();
             String newNickname = JOptionPane.showInputDialog(frame, "Enter your new nickname");
-            int status = app.setMyUsername(newNickname);
-            if (status == 0) {
+            try {
+                app.setMyUsername(newNickname);
                 titleLabel.setText("Welcome " + app.getMe().getNickname());
                 for (JLabel userLabel : usersOnline) {
                     if (userLabel.getText().contains("(you)")) {
                         userLabel.setText(app.getMe().getNickname() + " (you)");
                     }
                 }
-            } else {
-                JOptionPane.showMessageDialog(frame, "error");
+            } catch (UsernameEmptyException | UsernameUsedException ex) {
+               JOptionPane.showMessageDialog(frame, ex.getMessage());
             }
         });
 

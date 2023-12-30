@@ -22,7 +22,26 @@ public class TCPListener extends Thread{
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         String greeting = in.readLine();
         System.out.println(greeting);
+<<<<<<< HEAD
         
     }
+=======
+
+        if ("hello server".equals(greeting)) {
+            out.println("hello client");
+        }
+        else {
+            out.println("unrecognised greeting");
+        }
+    }
+
+    public void stop() throws IOException {
+        in.close();
+        out.close();
+        clientSocket.close();
+        serverSocket.close();
+    }
+   
+>>>>>>> helpme
 }
 
