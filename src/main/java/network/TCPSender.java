@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Objects;
 
 public class TCPSender {
     
@@ -31,19 +30,4 @@ public class TCPSender {
             clientSocket.close();
         }
 
-        public static void main(String[] args) {
-            String msg = args[0];
-            TCPSender client = new TCPSender();
-            try {
-                client.startConnection("localhost", 6666);
-                String response = client.sendMessage(msg);
-                System.out.println(response);
-                if (Objects.equals(msg, "close")) {
-                    client.stopConnection();
-                }
-            }
-            catch (IOException e) {
-                    e.printStackTrace();
-            }
-        }
 }

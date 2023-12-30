@@ -37,14 +37,6 @@ public class TCPListener {
         clientSocket.close();
         serverSocket.close();
     }
-    
-    public static void main(String[] args) {
-        TCPListener server=new TCPListener();
-        try {
-            server.start(6666);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+   
 }
 
