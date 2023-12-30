@@ -1,18 +1,21 @@
-import customExceptions.UserNotFoundException;
-import customExceptions.UsernameUsedException;
-import network.UDPListener;
-import objects.SystemApp;
-import views.LogIn;
-
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import customExceptions.UserNotFoundException;
+import customExceptions.UsernameUsedException;
+import database.DbController;
+import network.UDPListener;
+import objects.SystemApp;
+import views.LogIn;
 
 public class Main {
     public static void main(String[] args) throws IOException {
 
         System.out.println("Lancement de l'application");
         SystemApp app = SystemApp.getInstance();
+        DbController dbController = DbController.getInstance();
+        dbController.connect();
         app.usersListUpdateRoutine();
         UDPListener listener = new UDPListener();
         listener.addObserver((message) -> System.out.println(message.toString()));
