@@ -6,11 +6,13 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 import customExceptions.UserNotFoundException;
 import customExceptions.UsernameEmptyException;
 import customExceptions.UsernameUsedException;
+import network.TCPSender;
 import network.UDPSender;
 
 public class SystemApp {
@@ -18,6 +20,7 @@ public class SystemApp {
     private final UserList myUserList;
     private final UDPSender udpSender;
     private static SystemApp instance = null;
+    private ArrayList<InetAddress> openedChats = null;
 
     private SystemApp() throws SocketException, UnknownHostException {
         InetAddress address = getMyIp();
@@ -152,6 +155,18 @@ public class SystemApp {
             case RENAME:
                 setSomeoneUsername(message.getSender(), message.getContent().substring(18));
                 break;
+            case CHATREQUEST:
+                if (openedChats.contains(message.getSender())){
+                    try{
+                        udpSender.send(new UDPMessage("chat already opened", me.getIp(), message.getSender(), UDPMessage.TYPEUDPMESSAGE.CHATANSWER, false));
+                    } catch (IOException ignored) {
+                        // can potentially create a new exception for that
+                    }
+                    break;
+                }
+                openedChats.add(message.getSender());
+                TCPSender tcpSender = new TCPSender();
+                
         }
     }
 
