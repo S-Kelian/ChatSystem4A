@@ -54,8 +54,8 @@ public class LogIn {
                 app.setMyUsername(nickname);
                 frame.setVisible(false);
                 frame.dispose();
-                Chat chat = new Chat();
-                chat.create();
+                ContactList contactList = new ContactList();
+                contactList.create();
             } catch (UsernameEmptyException | UsernameUsedException ex) {
                 JOptionPane.showMessageDialog(frame, ex.getMessage());
             } catch (SocketException | UnknownHostException ex) {

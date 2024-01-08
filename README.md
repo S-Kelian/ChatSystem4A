@@ -1,4 +1,4 @@
-# Project : chat system
+# Project : contactList system
 
 Autors: Kelian Sebaici, Théophile Zenou-Truchot
 
