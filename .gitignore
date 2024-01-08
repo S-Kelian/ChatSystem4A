@@ -1,6 +1,9 @@
-#ConfigurationFiles
+# ConfigurationFiles
 .idea
 .vscode
+
+# Data
+*.db
 
 # Compiled Files
 *.class
