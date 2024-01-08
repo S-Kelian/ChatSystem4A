@@ -5,6 +5,7 @@ import java.util.TimerTask;
 import customExceptions.UserNotFoundException;
 import customExceptions.UsernameUsedException;
 import database.DbController;
+import network.TCPListener;
 import network.UDPListener;
 import objects.SystemApp;
 import views.LogIn;
@@ -17,18 +18,19 @@ public class Main {
         DbController dbController = DbController.getInstance();
         dbController.connect();
         app.usersListUpdateRoutine();
-        UDPListener listener = new UDPListener();
-        listener.addObserver((message) -> System.out.println(message.toString()));
-
-        listener.addObserver((message) -> {
+        UDPListener udpListener = new UDPListener();
+        TCPListener tcpListener = new TCPListener(); // on en a tout le temps besoin donc autant le créer ici pour éviter d en avoir plusieurs à la fin
+        
+        udpListener.addObserver((message) -> System.out.println(message.toString()));
+        udpListener.addObserver((message) -> {
             try {
                 app.receiveMessage(message);
             } catch (UserNotFoundException | UsernameUsedException e) {
                 System.err.println(e.getMessage());
             }
         });
-        listener.start();
-
+        udpListener.start();
+        tcpListener.start(49001);
         LogIn logIn = new LogIn();
         logIn.create();
 
