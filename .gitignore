@@ -1,6 +1,9 @@
-#ConfigurationFiles
+# ConfigurationFiles
 .idea
 .vscode
+
+# Data
+*.db
 
 # Compiled Files
 *.class
@@ -27,4 +30,3 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
-
