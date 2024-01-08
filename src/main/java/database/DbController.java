@@ -13,18 +13,16 @@ public class DbController {
 
  
     public void connect () {
-        String url = "jdbc:sqlite:database.db";
+        String url = "jdbc:sqlite:messages.db";
         try {
-            Class.forName("org.sqlite.JDBC");
             conn = DriverManager.getConnection(url);
             System.out.println("Connection to SQLite has been established.");
         } catch (SQLException e) {
             System.out.println("oopsie doopsie");
-        } catch (ClassNotFoundException e) {
-            System.out.println("doopsie oopsie");
             System.out.println(e.getMessage());
+        }
             // always catch the ClassNotFoundException for now reason is TBD (maybe dependency problem)
-        }       
+
     }
 
     public void disconnect () {
