@@ -10,19 +10,58 @@ import java.net.Socket;
 
 public class TCPListener extends Thread{
 
-    private ServerSocket serverSocket;
-    private Socket clientSocket;
-    private PrintWriter out;
-    private BufferedReader in;
+    private final ServerSocket serverSocket;
 
-    public void start(int port) throws IOException {
-        serverSocket = new ServerSocket(port);
-        clientSocket = serverSocket.accept();
-        out = new PrintWriter(clientSocket.getOutputStream(), true);
-        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        String greeting = in.readLine();
-        System.out.println(greeting);
-        
+    public TCPListener(int port) {
+        try {
+            serverSocket = new ServerSocket(port);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                new EchoClientHandler(serverSocket.accept()).start();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+    }
+
+    private static class EchoClientHandler extends Thread {
+        private final Socket clientSocket;
+
+        public EchoClientHandler(Socket socket) {
+            this.clientSocket = socket;
+        }
+
+        public void run() {
+            try {
+                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(clientSocket.getInputStream()));
+
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                if (".".equals(inputLine)) {
+                    out.println("bye");
+                    break;
+                }
+                out.println(inputLine);
+            }
+
+            in.close();
+            out.close();
+            clientSocket.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
 

@@ -22,8 +22,8 @@ public class Chat {
     // Instance of the application system
     private final SystemApp app = SystemApp.getInstance();
 
-    // List of labels representing online users
-    private final List<JLabel> usersOnline = new ArrayList<>();
+    // List of buttons representing online users
+    private final List<JButton> usersOnline = new ArrayList<>();
 
     // Constructor
     public Chat() throws SocketException, UnknownHostException {
@@ -64,7 +64,7 @@ public class Chat {
         frame.add(mainPanel);
 
         // Create the list of online users
-        createLabelsOfUsers(panelUsersOnline);
+        createButtonsOfUsers(panelUsersOnline);
 
         // Events
         refresh.addActionListener(e -> {
@@ -75,7 +75,7 @@ public class Chat {
             labelUsersOnline.setText("Users online : " + app.getMyUserList().getUsersOnline().size());
             panelUsersOnline.add(labelUsersOnline , BorderLayout.PAGE_START);
             panelUsersOnline.add(refresh, BorderLayout.PAGE_END);
-            createLabelsOfUsers(panelUsersOnline);
+            createButtonsOfUsers(panelUsersOnline);
             panelUsersOnline.revalidate();
             panelUsersOnline.repaint();
         });
@@ -87,13 +87,13 @@ public class Chat {
             try {
                 app.setMyUsername(newNickname);
                 titleLabel.setText("Welcome " + app.getMe().getNickname());
-                for (JLabel userLabel : usersOnline) {
-                    if (userLabel.getText().contains("(you)")) {
-                        userLabel.setText(app.getMe().getNickname() + " (you)");
+                for (JButton userButton : usersOnline) {
+                    if (userButton.getText().contains("(you)")) {
+                        userButton.setText(app.getMe().getNickname() + " (you)");
                     }
                 }
             } catch (UsernameEmptyException | UsernameUsedException ex) {
-               JOptionPane.showMessageDialog(frame, ex.getMessage());
+                JOptionPane.showMessageDialog(frame, ex.getMessage());
             }
         });
 
@@ -108,25 +108,25 @@ public class Chat {
     }
 
     /**
-     * Method to create user labels and add them to the list and the panel
+     * Method to create user buttons and add them to the list and the panel
      */
-    private void createLabelsOfUsers(JPanel panelUsersOnline) {
+    private void createButtonsOfUsers(JPanel panelUsersOnline) {
 
         JPanel usersOnlineList= new JPanel();
         usersOnlineList.setLayout(new BoxLayout(usersOnlineList, BoxLayout.Y_AXIS));
         for (int i = 0; i < app.getMyUserList().getUsersOnline().size(); i++) {
-            JLabel userLabel = new JLabel(app.getMyUserList().getUsersOnline().get(i).getNickname());
+            JButton userButton = new JButton(app.getMyUserList().getUsersOnline().get(i).getNickname());
 
             // Add "(you)" to the label of the current user
             if (app.getMyUserList().getUsersOnline().get(i).getNickname().equals(app.getMe().getNickname())) {
-                userLabel.setText(userLabel.getText() + " (you)");
+                userButton.setText(userButton.getText() + " (you)");
             }
 
             // Add the label to the list and the panel
-            usersOnline.add(userLabel);
+            usersOnline.add(userButton);
         }
-        for (JLabel userLabel : usersOnline) {
-            usersOnlineList.add(userLabel);
+        for (JButton userButton : usersOnline) {
+            usersOnlineList.add(userButton);
         }
         panelUsersOnline.add(usersOnlineList, BorderLayout.CENTER);
     }

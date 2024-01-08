@@ -19,7 +19,7 @@ public class Main {
         dbController.connect();
         app.usersListUpdateRoutine();
         UDPListener udpListener = new UDPListener();
-        TCPListener tcpListener = new TCPListener(); // on en a tout le temps besoin donc autant le créer ici pour éviter d en avoir plusieurs à la fin
+        TCPListener tcpListener = new TCPListener(49001); // on en a tout le temps besoin donc autant le créer ici pour éviter d en avoir plusieurs à la fin
         
         udpListener.addObserver((message) -> System.out.println(message.toString()));
         udpListener.addObserver((message) -> {
@@ -30,7 +30,7 @@ public class Main {
             }
         });
         udpListener.start();
-        tcpListener.start(49001);
+        tcpListener.start();
         LogIn logIn = new LogIn();
         logIn.create();
 
