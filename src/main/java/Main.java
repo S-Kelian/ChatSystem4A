@@ -20,7 +20,7 @@ public class Main {
         dbController.connect();
         app.usersListUpdateRoutine();
         UDPListener udpListener = new UDPListener();
-        TCPListener tcpListener = new TCPListener(49001);
+        TCPListener tcpListener = new TCPListener(49002);
         udpListener.addObserver((message) -> System.out.println(message.toString()));
         udpListener.addObserver((message) -> {
             try {

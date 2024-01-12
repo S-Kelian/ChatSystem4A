@@ -6,6 +6,7 @@ import java.util.ArrayList;
 public class UserList {
 
   private final ArrayList<User> contacts;
+  private ArrayList<InetAddress> openedChats = null;
   
   public UserList(User me){
     contacts = new ArrayList<>();
@@ -20,6 +21,24 @@ public class UserList {
     return contacts;
   }
 
+  public ArrayList<InetAddress> getOpenedChats() {
+    return openedChats;
+  }
+
+  public void openChat (InetAddress ip) {
+    if (openedChats.contains(ip)) {
+      System.out.println("Chat already opened");;
+    } else {
+    openedChats.add(ip);
+  }
+}
+  public void closeChat (InetAddress ip) {
+    if (openedChats.contains(ip)) {
+      openedChats.remove(ip);
+    } else {
+      System.out.println("Chat not opened");
+    }
+  }
     /**
      * Add a user to the list
      * @param someone the user to add

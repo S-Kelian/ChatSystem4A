@@ -20,7 +20,7 @@ public class SystemApp {
     private final UserList myUserList;
     private final UDPSender udpSender;
     private static SystemApp instance = null;
-    private ArrayList<InetAddress> openedChats = null;
+    private ArrayList<TCPSender> senders = null;
 
     private SystemApp() throws SocketException, UnknownHostException {
         InetAddress address = getMyIp();
@@ -156,16 +156,23 @@ public class SystemApp {
                 setSomeoneUsername(message.getSender(), message.getContent().substring(18));
                 break;
             case CHATREQUEST:
-                if (openedChats.contains(message.getSender())){
+                InetAddress sender = message.getSender();
+                if (UserList.getOpenedChats().contains(sender)){
                     try{
-                        udpSender.send(new UDPMessage("chat already opened", me.getIp(), message.getSender(), UDPMessage.TYPEUDPMESSAGE.CHATANSWER, false));
+                        udpSender.send(new UDPMessage("chat already opened", me.getIp(), sender, UDPMessage.TYPEUDPMESSAGE.CHATANSWER, false));
                     } catch (IOException ignored) {
                         // can potentially create a new exception for that
                     }
                     break;
                 }
-                openedChats.add(message.getSender());
+                UserList.openChat(sender);
                 TCPSender tcpSender = new TCPSender();
+                senders.add(tcpSender);
+                try {
+                    tcpSender.startConnection(sender, 49002);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             default:
                 break;
                 
