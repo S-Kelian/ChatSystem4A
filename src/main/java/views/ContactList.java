@@ -3,6 +3,7 @@ package views;
 import customExceptions.UsernameEmptyException;
 import customExceptions.UsernameUsedException;
 import objects.SystemApp;
+import objects.UDPMessage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -118,12 +119,9 @@ public class ContactList {
     private void addEventListenersForOtherUsers(JButton connectButton, JButton historyButton, int index) {
         connectButton.addActionListener(e -> {
             // Ask the user if they want to open a chat with the selected user
-            int askResponse = ((int) (Math.random() * 10) % 2);
-            if (askResponse == 0) {
-                // Open a chat with the selected user
-            } else if (askResponse == 1) {
-                JOptionPane.showMessageDialog(null, "Refused to chat with you", "Refused", JOptionPane.INFORMATION_MESSAGE);
-            }
+            app.getMyUserList().userIsInOpenedChats(app.getMyUserList().getUsersOnline().get(index).getIp());
+            app.sendUnicast("chat request", app.getMyUserList().getUsersOnline().get(index).getIp(), UDPMessage.TYPEUDPMESSAGE.CHATREQUEST);
+            JOptionPane.showInputDialog("An invitation has been sent to " + app.getMyUserList().getUsersOnline().get(index).getNickname() + ".\n A new chat will be opened if he accept.");
         });
 
         historyButton.addActionListener(e -> {

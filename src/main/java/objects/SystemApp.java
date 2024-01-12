@@ -14,13 +14,15 @@ import customExceptions.UsernameEmptyException;
 import customExceptions.UsernameUsedException;
 import network.TCPSender;
 import network.UDPSender;
+import views.ChatRequest;
+
+import javax.swing.*;
 
 public class SystemApp {
     private final User me;
     private final UserList myUserList;
     private final UDPSender udpSender;
     private static SystemApp instance = null;
-    private ArrayList<InetAddress> openedChats = null;
 
     private SystemApp() throws SocketException, UnknownHostException {
         InetAddress address = getMyIp();
@@ -50,9 +52,11 @@ public class SystemApp {
      * Get the userlist of the system
      * @return the userlist
      */
+
     public UserList getMyUserList(){
         return myUserList;
     }
+
     /**
      * Set the nickname of the user and return an error code to let the user know if the operation was successful or not.
      * @param nickname new nickname of the user
@@ -124,7 +128,7 @@ public class SystemApp {
      * Treatment of the received message
      * @param message received
      */
-    public void receiveMessage(UDPMessage message) throws UserNotFoundException, UsernameUsedException {
+    public void receiveMessage(UDPMessage message) throws UserNotFoundException, UsernameUsedException, SocketException, UnknownHostException {
         if (message.getSender().equals(me.getIp())) {
             return;
         }
@@ -156,17 +160,25 @@ public class SystemApp {
                 setSomeoneUsername(message.getSender(), message.getContent().substring(18));
                 break;
             case CHATREQUEST:
-                if (openedChats.contains(message.getSender())){
+                if (myUserList.userIsInOpenedChats(message.getSender())){
                     try{
                         udpSender.send(new UDPMessage("chat already opened", me.getIp(), message.getSender(), UDPMessage.TYPEUDPMESSAGE.CHATANSWER, false));
                     } catch (IOException ignored) {
                         // can potentially create a new exception for that
                     }
-                    break;
+                } else {
+                    String senderName = myUserList.getUserByIp(message.getSender()).getNickname();
+                    ChatRequest chatRequest = new ChatRequest(senderName);
+                    chatRequest.create();
                 }
-                openedChats.add(message.getSender());
-                TCPSender tcpSender = new TCPSender();
-                
+                break;
+            case CHATANSWER:
+                if (message.getContent().equals("RequestAccepted")){
+                    myUserList.addOpenedChat(message.getSender());
+                } else {
+                    JOptionPane.showMessageDialog(null, message.getSender()+" refused your chat request.");
+                }
+                break;
         }
     }
 

@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -20,13 +21,13 @@ public class Main {
         dbController.connect();
         app.usersListUpdateRoutine();
         UDPListener udpListener = new UDPListener();
-        TCPListener tcpListener = new TCPListener(49001); // on en a tout le temps besoin donc autant le créer ici pour éviter d en avoir plusieurs à la fin
+        TCPListener tcpListener = new TCPListener(49002); // on en a tout le temps besoin donc autant le créer ici pour éviter d en avoir plusieurs à la fin
         
         udpListener.addObserver((message) -> System.out.println(message.toString()));
         udpListener.addObserver((message) -> {
             try {
                 app.receiveMessage((UDPMessage) message);
-            } catch (UserNotFoundException | UsernameUsedException e) {
+            } catch (UserNotFoundException | UsernameUsedException | SocketException e) {
                 System.err.println(e.getMessage());
             }
         });

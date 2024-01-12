@@ -6,6 +6,7 @@ import java.util.ArrayList;
 public class UserList {
 
   private final ArrayList<User> contacts;
+  private ArrayList<InetAddress> openedChats = new ArrayList<>();
   
   public UserList(User me){
     contacts = new ArrayList<>();
@@ -27,6 +28,14 @@ public class UserList {
   public synchronized void addUser(User someone){
     contacts.add(someone);
   }
+
+  /**
+   * Add a user to the list of opened chats
+   * @param someone the user to add
+   */
+    public synchronized void addOpenedChat(InetAddress someone){
+        openedChats.add(someone);
+    }
 
   /**
    * Update the status of a user
@@ -134,5 +143,17 @@ public class UserList {
         }
     }
     return usersOnline;
+  }
+
+  /**
+  * Check if a user is in the list of opened chats
+  */
+  public synchronized boolean userIsInOpenedChats(InetAddress someone) {
+    for (InetAddress user : openedChats) {
+      if (user.equals(someone)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
