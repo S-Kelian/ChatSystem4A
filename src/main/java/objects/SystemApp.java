@@ -166,6 +166,8 @@ public class SystemApp {
                 }
                 openedChats.add(message.getSender());
                 TCPSender tcpSender = new TCPSender();
+            default:
+                break;
                 
         }
     }

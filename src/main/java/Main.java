@@ -18,18 +18,18 @@ public class Main {
         DbController dbController = DbController.getInstance();
         dbController.connect();
         app.usersListUpdateRoutine();
-        UDPListener listener = new UDPListener();
-        listener.addObserver((message) -> System.out.println(message.toString()));
-
-        listener.addObserver((message) -> {
+        UDPListener udpListener = new UDPListener();
+        TCPListener tcpListener = new TCPListener(49001);
+        udpListener.addObserver((message) -> System.out.println(message.toString()));
+        udpListener.addObserver((message) -> {
             try {
                 app.receiveMessage(message);
             } catch (UserNotFoundException | UsernameUsedException e) {
                 System.err.println(e.getMessage());
             }
         });
-        listener.start();
-
+        udpListener.start();
+        tcpListener.start();
         LogIn logIn = new LogIn();
         logIn.create();
 
