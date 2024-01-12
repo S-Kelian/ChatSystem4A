@@ -8,16 +8,11 @@ import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class UDPListener extends Thread{
-
-    public interface Observer {
-        void handle(UDPMessage message) throws UnknownHostException;
-    }
 
     public void addObserver(Observer observer) {
         synchronized (this.observers) {

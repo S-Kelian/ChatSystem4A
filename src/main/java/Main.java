@@ -8,6 +8,7 @@ import database.DbController;
 import network.TCPListener;
 import network.UDPListener;
 import objects.SystemApp;
+import objects.UDPMessage;
 import views.LogIn;
 
 public class Main {
@@ -23,7 +24,7 @@ public class Main {
         udpListener.addObserver((message) -> System.out.println(message.toString()));
         udpListener.addObserver((message) -> {
             try {
-                app.receiveMessage(message);
+                app.receiveMessage((UDPMessage) message);
             } catch (UserNotFoundException | UsernameUsedException e) {
                 System.err.println(e.getMessage());
             }
