@@ -1,133 +1,87 @@
 package views;
 
-import java.awt.BorderLayout;
+import database.DbController;
+import objects.SystemApp;
+import objects.TCPMessage;
+import objects.User;
+
+import javax.swing.*;
+import java.awt.*;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
-import customExceptions.UsernameEmptyException;
-import customExceptions.UsernameUsedException;
-import objects.SystemApp;
 
 public class Chat {
 
     // Instance of the application system
     private final SystemApp app = SystemApp.getInstance();
+    private final DbController dbController = DbController.getInstance();
+    private final User receiver;
+    private boolean historyOnly = false;
 
-    // List of labels representing online users
-    private final List<JLabel> usersOnline = new ArrayList<>();
-
-    // Constructor
-    public Chat() throws SocketException, UnknownHostException {
+    public Chat(String receiverIP, boolean historyOnly) throws SocketException, UnknownHostException {
+        this.receiver = app.getMyUserList().getUserByNickname(receiverIP);
+        this.historyOnly = historyOnly;
     }
 
-    // Method to create and display the chat window
     public void create() {
-
-        JFrame frame = new JFrame("Chat");
+        JFrame frame = new JFrame("Chat with " + receiver);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         //set max size
-        frame.setSize(500, 500);
+        frame.setSize(1000, 1000);
 
         JPanel mainPanel = new JPanel();
-        JPanel panelNickname = new JPanel();
-        JLabel titleLabel = new JLabel("Welcome " + app.getMe().getNickname());
-        JPanel panelUsersOnline = new JPanel();
-        JLabel labelUsersOnline = new JLabel("Users online : " + app.getMyUserList().getUsersOnline().size());
-        JButton refresh = new JButton("Refresh");
-        JPanel profilePanel = new JPanel();
-        JButton rename = new JButton("Rename");
-        JButton disconnect = new JButton("Disconnect");
+        JPanel panelTop = new JPanel();
+        JPanel panelMessageHistory = new JPanel();
+        JPanel panelSendMessage = new JPanel();
+
+        JLabel titleLabel = new JLabel("Chat with " + receiver);
+        JButton topButton = new JButton("Stop chat");
+        if (historyOnly) {
+            topButton.setText("Start chat");
+        }
+        JTextField messageField = new JTextField();
+        JButton sendButton = new JButton("Send");
 
         // Set properties
-        mainPanel.setLayout(new BorderLayout());
-        panelUsersOnline.setLayout(new BorderLayout());
+        mainPanel.setAlignmentY(Component.CENTER_ALIGNMENT);
+        panelTop.setLayout(new BorderLayout());
+        panelMessageHistory.setLayout(new BoxLayout(panelMessageHistory, BoxLayout.Y_AXIS));
+        panelSendMessage.setLayout(new BorderLayout());
+
+        try {
+            ArrayList<TCPMessage> messages = dbController.getMessagesOf(receiver.getIp());
+            for (TCPMessage message : messages) {
+                JPanel panelMessage = new JPanel();
+                JLabel dateLabel = new JLabel(message.getDate());
+                dateLabel.setFont(new Font("Arial", Font.ITALIC, 5));
+                JLabel labelMessage = new JLabel(message.getSender() + " : " + message.getContent());
+                panelMessage.add(dateLabel);
+                panelMessage.add(labelMessage);
+                if (message.getSender().toString().equals(app.getMe().getNickname())) {
+                    panelMessage.setAlignmentX(Component.RIGHT_ALIGNMENT);
+                } else {
+                    panelMessage.setAlignmentX(Component.LEFT_ALIGNMENT);
+                }
+                panelMessageHistory.add(panelMessage);
+            }
+        } catch (SQLException | UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
 
         //add components
-        panelUsersOnline.add(labelUsersOnline , BorderLayout.PAGE_START);
-        panelUsersOnline.add(refresh, BorderLayout.PAGE_END);
-        panelNickname.add(titleLabel);
-        profilePanel.add(rename);
-        profilePanel.add(disconnect);
+        panelTop.add(titleLabel, BorderLayout.LINE_START);
+        panelTop.add(topButton, BorderLayout.LINE_END);
+        panelSendMessage.add(messageField, BorderLayout.CENTER);
+        panelSendMessage.add(sendButton, BorderLayout.LINE_END);
 
-        mainPanel.add(panelNickname, BorderLayout.PAGE_START);
-        mainPanel.add(panelUsersOnline, BorderLayout.LINE_END);
-        mainPanel.add(profilePanel, BorderLayout.PAGE_END);
+        mainPanel.add(panelTop);
+        mainPanel.add(panelMessageHistory);
+        mainPanel.add(panelSendMessage);
+
         frame.add(mainPanel);
-
-        // Create the list of online users
-        createLabelsOfUsers(panelUsersOnline);
-
-        // Events
-        refresh.addActionListener(e -> {
-            // Refresh the list of online users
-            app.usersListUpdateRoutine();
-            usersOnline.clear();
-            panelUsersOnline.removeAll();
-            labelUsersOnline.setText("Users online : " + app.getMyUserList().getUsersOnline().size());
-            panelUsersOnline.add(labelUsersOnline , BorderLayout.PAGE_START);
-            panelUsersOnline.add(refresh, BorderLayout.PAGE_END);
-            createLabelsOfUsers(panelUsersOnline);
-            panelUsersOnline.revalidate();
-            panelUsersOnline.repaint();
-        });
-
-        rename.addActionListener(e -> {
-            // Rename the user
-            app.usersListUpdateRoutine();
-            String newNickname = JOptionPane.showInputDialog(frame, "Enter your new nickname");
-            try {
-                app.setMyUsername(newNickname);
-                titleLabel.setText("Welcome " + app.getMe().getNickname());
-                for (JLabel userLabel : usersOnline) {
-                    if (userLabel.getText().contains("(you)")) {
-                        userLabel.setText(app.getMe().getNickname() + " (you)");
-                    }
-                }
-            } catch (UsernameEmptyException | UsernameUsedException ex) {
-               JOptionPane.showMessageDialog(frame, ex.getMessage());
-            }
-        });
-
-        disconnect.addActionListener(e -> {
-            // Disconnect the user and close chat system
-            app.disconnect();
-            frame.dispose();
-        });
-
-        // Making the window visible
         frame.setVisible(true);
-    }
 
-    /**
-     * Method to create user labels and add them to the list and the panel
-     */
-    private void createLabelsOfUsers(JPanel panelUsersOnline) {
-
-        JPanel usersOnlineList= new JPanel();
-        usersOnlineList.setLayout(new BoxLayout(usersOnlineList, BoxLayout.Y_AXIS));
-        for (int i = 0; i < app.getMyUserList().getUsersOnline().size(); i++) {
-            JLabel userLabel = new JLabel(app.getMyUserList().getUsersOnline().get(i).getNickname());
-
-            // Add "(you)" to the label of the current user
-            if (app.getMyUserList().getUsersOnline().get(i).getNickname().equals(app.getMe().getNickname())) {
-                userLabel.setText(userLabel.getText() + " (you)");
-            }
-
-            // Add the label to the list and the panel
-            usersOnline.add(userLabel);
-        }
-        for (JLabel userLabel : usersOnline) {
-            usersOnlineList.add(userLabel);
-        }
-        panelUsersOnline.add(usersOnlineList, BorderLayout.CENTER);
     }
 }

@@ -17,12 +17,14 @@ public class DbController {
         try {
             conn = DriverManager.getConnection(url);
             System.out.println("Connection to SQLite has been established.");
+            String sql = "Create table if not exists messages (id int primary key, content varchar(255), sender varchar(255), receiver varchar(255), date varchar(255), type int)";
+            Statement statement = conn.createStatement();
+            statement.executeUpdate(sql);
+            System.out.println("Table created");
         } catch (SQLException e) {
             System.out.println("oopsie doopsie");
             System.out.println(e.getMessage());
         }
-            // always catch the ClassNotFoundException for now reason is TBD (maybe dependency problem)
-
     }
 
     public void disconnect () {
