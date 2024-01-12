@@ -43,6 +43,11 @@ public class Chat {
         }
         JTextField messageField = new JTextField();
         JButton sendButton = new JButton("Send");
+        if (historyOnly) {
+            messageField.setEnabled(false);
+            messageField.setText("You need to start a chat to send messages");
+            sendButton.setEnabled(false);
+        }
 
         // Set properties
         mainPanel.setAlignmentY(Component.CENTER_ALIGNMENT);
@@ -69,6 +74,19 @@ public class Chat {
         } catch (SQLException | UnknownHostException e) {
             throw new RuntimeException(e);
         }
+
+        // Events
+        topButton.addActionListener(e -> {
+            if (historyOnly) {
+                // Start chat with the user
+            } else {
+                // Stop chat with the user
+                JOptionPane.showConfirmDialog(null, "Are you sure you want to stop the chat with " + receiver + " ?", "Stop chat", JOptionPane.YES_NO_OPTION);
+                if (JOptionPane.YES_OPTION == 0) {
+                    frame.dispose();
+                }
+            }
+        });
 
         //add components
         panelTop.add(titleLabel, BorderLayout.LINE_START);
