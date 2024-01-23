@@ -3,12 +3,14 @@ package views;
 import database.DbController;
 import objects.SystemApp;
 import objects.TCPMessage;
+import objects.UDPMessage;
 import objects.User;
 
 import javax.swing.*;
 import java.awt.*;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -55,6 +57,52 @@ public class Chat {
         panelMessageHistory.setLayout(new BoxLayout(panelMessageHistory, BoxLayout.Y_AXIS));
         panelSendMessage.setLayout(new BorderLayout());
 
+        // Create the list of messages
+        makeChatHistory(panelMessageHistory);
+
+        // Events
+        topButton.addActionListener(e -> {
+            if (historyOnly) {
+                // Start chat with the user
+                JOptionPane.showInputDialog("Return to the contact list, a new chat window will appear when " + receiver + " will accept the chat request");
+                app.sendUnicast("chat request", receiver.getIp(), UDPMessage.TYPEUDPMESSAGE.CHATANSWER);
+                frame.dispose();
+            } else {
+                // Stop chat with the user
+                JOptionPane.showConfirmDialog(null, "Are you sure you want to stop the chat with " + receiver + " ?", "Stop chat", JOptionPane.YES_NO_OPTION);
+                if (JOptionPane.YES_OPTION == 0) {
+                    app.sendUnicast("stop chat", receiver.getIp(), UDPMessage.TYPEUDPMESSAGE.STOPCHAT);
+                    frame.dispose();
+                }
+            }
+        });
+
+        sendButton.addActionListener(e -> {
+            // Send the message to the user
+            String message = messageField.getText();
+            if (!message.isEmpty()) {
+                Date date = new Date(System.currentTimeMillis());
+                TCPMessage tcpMessage = new TCPMessage(message, app.getMe().getIp(), receiver.getIp(), date.toString(), 0);
+                app.sendMessage(tcpMessage);
+            }
+        });
+
+        //add components
+        panelTop.add(titleLabel, BorderLayout.LINE_START);
+        panelTop.add(topButton, BorderLayout.LINE_END);
+        panelSendMessage.add(messageField, BorderLayout.CENTER);
+        panelSendMessage.add(sendButton, BorderLayout.LINE_END);
+
+        mainPanel.add(panelTop);
+        mainPanel.add(panelMessageHistory);
+        mainPanel.add(panelSendMessage);
+
+        frame.add(mainPanel);
+        frame.setVisible(true);
+
+    }
+
+    public void makeChatHistory (JPanel panelMessageHistory){
         try {
             ArrayList<TCPMessage> messages = dbController.getMessagesOf(receiver.getIp());
             for (TCPMessage message : messages) {
@@ -74,32 +122,5 @@ public class Chat {
         } catch (SQLException | UnknownHostException e) {
             throw new RuntimeException(e);
         }
-
-        // Events
-        topButton.addActionListener(e -> {
-            if (historyOnly) {
-                // Start chat with the user
-            } else {
-                // Stop chat with the user
-                JOptionPane.showConfirmDialog(null, "Are you sure you want to stop the chat with " + receiver + " ?", "Stop chat", JOptionPane.YES_NO_OPTION);
-                if (JOptionPane.YES_OPTION == 0) {
-                    frame.dispose();
-                }
-            }
-        });
-
-        //add components
-        panelTop.add(titleLabel, BorderLayout.LINE_START);
-        panelTop.add(topButton, BorderLayout.LINE_END);
-        panelSendMessage.add(messageField, BorderLayout.CENTER);
-        panelSendMessage.add(sendButton, BorderLayout.LINE_END);
-
-        mainPanel.add(panelTop);
-        mainPanel.add(panelMessageHistory);
-        mainPanel.add(panelSendMessage);
-
-        frame.add(mainPanel);
-        frame.setVisible(true);
-
     }
 }

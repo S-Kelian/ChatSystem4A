@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.net.SocketException;
+import java.sql.SQLException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -9,7 +10,9 @@ import database.DbController;
 import network.TCPListener;
 import network.UDPListener;
 import objects.SystemApp;
+import objects.TCPMessage;
 import objects.UDPMessage;
+import objects.User;
 import views.LogIn;
 
 public class Main {
@@ -31,6 +34,19 @@ public class Main {
                 System.err.println(e.getMessage());
             }
         });
+
+        tcpListener.addObserver((message) -> System.out.println(message.toString()));
+        tcpListener.addObserver((message) -> {
+            try {
+                User sender = app.getMyUserList().getUserByIp(message.getSender());
+                User receiver = app.getMyUserList().getUserByIp(message.getReceiver());
+                dbController.insertMessage(message.getContent(), sender.getNickname(), receiver.getNickname(), ((TCPMessage) message).getDate(), ((TCPMessage) message).getType());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+
         udpListener.start();
         tcpListener.start();
         LogIn logIn = new LogIn();

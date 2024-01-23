@@ -6,7 +6,7 @@ import java.net.InetAddress;
 public class UDPMessage implements Message, Serializable {
 
     public enum TYPEUDPMESSAGE {
-        REQUEST, RESPONSE, DISCONNECTION, RENAME, CHATREQUEST, CHATANSWER
+        REQUEST, RESPONSE, DISCONNECTION, RENAME, CHATREQUEST, CHATANSWER, STOPCHAT
     }
 
     private final String content;

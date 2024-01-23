@@ -1,33 +1,31 @@
 package network;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import objects.TCPMessage;
+
+import java.io.*;
 import java.net.Socket;
 
 public class TCPSender {
     
     private Socket clientSocket;
-        private PrintWriter out;
-        private BufferedReader in;
+    private ObjectOutputStream objectOut;
+    private ObjectInputStream objectIn;
 
-        public void startConnection(String ip, int port) throws IOException {
-            clientSocket = new Socket(ip, port);
-            out = new PrintWriter(clientSocket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        }
+    public void startConnection(String ip, int port) throws IOException {
+        clientSocket = new Socket(ip, port);
+        objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
+        objectIn = new ObjectInputStream(clientSocket.getInputStream());
+    }
 
-        public String sendMessage(String msg) throws IOException {
-            out.println(msg);
-            String resp = in.readLine();
-            return resp;
-        }
+    public void sendMessage(TCPMessage msg) throws IOException {
+        objectOut.writeObject(msg);
+        objectOut.flush();
+    }
 
-        public void stopConnection() throws IOException {
-            in.close();
-            out.close();
-            clientSocket.close();
-        }
+    public void stopConnection() throws IOException {
+        objectIn.close();
+        objectOut.close();
+        clientSocket.close();
+    }
 
 }

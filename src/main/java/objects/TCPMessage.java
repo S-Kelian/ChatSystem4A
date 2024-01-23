@@ -1,15 +1,16 @@
 package objects;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.Date;
 
-public class TCPMessage implements Message{
+public class TCPMessage implements Message, Serializable {
 
     private final String content;
     private final InetAddress sender;
     private final InetAddress receiver;
     private final String date; // date of the message
-    private final int type; // type of the message
+    private final int type; // type of the message (message, image, file, etc)
 
     public TCPMessage(String content, InetAddress sender, InetAddress receiver, String date, int type){
         this.content = content;

@@ -1,14 +1,5 @@
 package objects;
 
-import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-
 import customExceptions.UserNotFoundException;
 import customExceptions.UsernameEmptyException;
 import customExceptions.UsernameUsedException;
@@ -17,6 +8,9 @@ import network.UDPSender;
 import views.ChatRequest;
 
 import javax.swing.*;
+import java.io.IOException;
+import java.net.*;
+import java.util.Enumeration;
 
 public class SystemApp {
     private final User me;
@@ -119,6 +113,18 @@ public class SystemApp {
         try {
             UDPMessage message = new UDPMessage(content, me.getIp(), address, type, false);
             udpSender.send(message);
+            if (type == UDPMessage.TYPEUDPMESSAGE.CHATANSWER && content.equals("RequestAccepted")){
+                TCPSender tcpSender = new TCPSender();
+                try {
+                    tcpSender.startConnection(address.toString(), 49002);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                myUserList.addOpenedChat(address, tcpSender);
+            }
+            if (type == UDPMessage.TYPEUDPMESSAGE.STOPCHAT){
+                myUserList.removeOpenedChat(address);
+            }
         } catch (IOException ignored) {
             System.out.println("Error while sending message");
         }
@@ -174,11 +180,20 @@ public class SystemApp {
                 break;
             case CHATANSWER:
                 if (message.getContent().equals("RequestAccepted")){
-                    myUserList.addOpenedChat(message.getSender());
+                    TCPSender tcpSender = new TCPSender();
+                    try {
+                        tcpSender.startConnection(message.getSender().toString(), 49002);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    myUserList.addOpenedChat(message.getSender(), tcpSender);
                 } else {
                     JOptionPane.showMessageDialog(null, message.getSender()+" refused your chat request.");
                 }
                 break;
+            case STOPCHAT:
+               myUserList.removeOpenedChat(message.getSender());
+               break;
         }
     }
 
@@ -228,4 +243,11 @@ public class SystemApp {
         return address;
     }
 
+    public void sendMessage(TCPMessage tcpMessage) {
+        try {
+            myUserList.getOpenedChats().get(tcpMessage.getReceiver()).sendMessage(tcpMessage);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

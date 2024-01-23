@@ -108,10 +108,10 @@ public class ContactList {
                 userLabel.setText(userLabel.getText() + " (you)");
             } else {
                 addEventListenersForOtherUsers(connectButton, historyButton, i);
+                userPanel.add(connectButton);
+                userPanel.add(historyButton);
             }
             userPanel.add(userLabel);
-            userPanel.add(connectButton);
-            userPanel.add(historyButton);
             panelUsersOnline.add(userPanel);
         }
     }

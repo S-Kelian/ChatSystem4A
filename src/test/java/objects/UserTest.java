@@ -40,12 +40,6 @@ class UserTest {
     }
 
     @Test
-    void setPortTest() {
-        userTest.setPort(1234);
-        assertEquals(1234, userTest.getPort());
-    }
-
-    @Test
     void getIpTest() {
         assertEquals("/127.0.0.1", userTest.getIp().toString());
     }

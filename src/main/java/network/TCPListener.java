@@ -1,16 +1,17 @@
 package network;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import objects.TCPMessage;
+
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
-
-public class TCPListener extends Thread{
+public class TCPListener extends Thread {
 
     private final ServerSocket serverSocket;
+    private final List<Observer> observers = new ArrayList<>();
 
     public TCPListener(int port) {
         try {
@@ -20,11 +21,17 @@ public class TCPListener extends Thread{
         }
     }
 
+    public void addObserver(Observer observer) {
+        synchronized (this.observers) {
+            this.observers.add(observer);
+        }
+    }
+
     @Override
     public void run() {
         while (true) {
             try {
-                new EchoClientHandler(serverSocket.accept()).start();
+                new EchoClientHandler(serverSocket.accept(), observers).start();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -33,34 +40,31 @@ public class TCPListener extends Thread{
 
     private static class EchoClientHandler extends Thread {
         private final Socket clientSocket;
+        private final List<Observer> observers;
 
-        public EchoClientHandler(Socket socket) {
+        public EchoClientHandler(Socket socket, List<Observer> observers) {
             this.clientSocket = socket;
+            this.observers = observers;
         }
 
         public void run() {
             try {
-                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                ObjectOutputStream objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
+                ObjectInputStream objectIn = new ObjectInputStream(clientSocket.getInputStream());
 
-                BufferedReader in = new BufferedReader(
-                        new InputStreamReader(clientSocket.getInputStream()));
-
-            String inputLine;
-            while ((inputLine = in.readLine()) != null) {
-                if (".".equals(inputLine)) {
-                    out.println("bye");
-                    break;
+                TCPMessage inputMessage;
+                while ((inputMessage = (TCPMessage) objectIn.readObject()) != null) {
+                    for (Observer observer : observers) {
+                        observer.handle(inputMessage);
+                    }
                 }
-                out.println(inputLine);
-            }
 
-            in.close();
-            out.close();
-            clientSocket.close();
-            } catch (IOException e) {
+                objectIn.close();
+                objectOut.close();
+                clientSocket.close();
+            } catch (IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 }
-

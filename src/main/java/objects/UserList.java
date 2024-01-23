@@ -1,12 +1,16 @@
 package objects;
 
+import network.TCPSender;
+
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UserList {
 
   private final ArrayList<User> contacts;
-  private ArrayList<InetAddress> openedChats = new ArrayList<>();
+  private final Map<InetAddress, TCPSender> openedChats = new HashMap<>();
   
   public UserList(User me){
     contacts = new ArrayList<>();
@@ -33,8 +37,8 @@ public class UserList {
    * Add a user to the list of opened chats
    * @param someone the user to add
    */
-    public synchronized void addOpenedChat(InetAddress someone){
-        openedChats.add(someone);
+    public synchronized void addOpenedChat(InetAddress someone, TCPSender tcpSender){
+        openedChats.put(someone, tcpSender);
     }
 
   /**
@@ -149,11 +153,19 @@ public class UserList {
   * Check if a user is in the list of opened chats
   */
   public synchronized boolean userIsInOpenedChats(InetAddress someone) {
-    for (InetAddress user : openedChats) {
+    for (InetAddress user : openedChats.keySet()) {
       if (user.equals(someone)) {
         return true;
       }
     }
     return false;
+  }
+
+  public Map<InetAddress, TCPSender> getOpenedChats() {
+    return openedChats;
+  }
+
+  public void removeOpenedChat(InetAddress sender) {
+    openedChats.remove(sender);
   }
 }
