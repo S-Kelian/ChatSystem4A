@@ -8,7 +8,6 @@ import objects.User;
 
 import javax.swing.*;
 import java.awt.*;
-import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.sql.Date;
@@ -17,112 +16,110 @@ import java.util.ArrayList;
 
 public class Chat {
 
-    // Instance of the application system
     private final SystemApp app = SystemApp.getInstance();
     private final DbController dbController = DbController.getInstance();
     private final User receiver;
     private boolean historyOnly = false;
+    private JTextArea messageTextArea;
+    private JTextField messageField;
+    private JFrame frame;
 
     public Chat(String receiverName, boolean historyOnly) throws SocketException, UnknownHostException {
         this.receiver = app.getMyUserList().getUserByNickname(receiverName);
-        System.out.println("Chat with " + receiver.getNickname());
         this.historyOnly = historyOnly;
     }
 
     public void create() {
-        JFrame frame = new JFrame("Chat with " + receiver);
+        frame = new JFrame("Chat with " + receiver);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        //set max size
-        frame.setSize(1000, 1000);
+        frame.setSize(800, 600);
 
-        JPanel mainPanel = new JPanel();
-        JPanel panelTop = new JPanel();
-        JPanel panelMessageHistory = new JPanel();
-        JPanel panelSendMessage = new JPanel();
+        JPanel mainPanel = new JPanel(new BorderLayout());
 
         JLabel titleLabel = new JLabel("Chat with " + receiver);
-        JButton topButton = new JButton("Stop chat");
-        if (historyOnly) {
-            topButton.setText("Start chat");
-        }
-        JTextField messageField = new JTextField();
+        JButton topButton = new JButton(historyOnly ? "Start chat" : "Stop chat");
+        messageField = new JTextField();
         JButton sendButton = new JButton("Send");
+
+        JButton closeButton = null;
         if (historyOnly) {
-            messageField.setEnabled(false);
-            messageField.setText("You need to start a chat to send messages");
-            sendButton.setEnabled(false);
+            closeButton = new JButton("Close");
+            closeButton.addActionListener(e -> frame.dispose());
+            mainPanel.add(closeButton, BorderLayout.PAGE_END);
         }
 
-        // Set properties
-        mainPanel.setAlignmentY(Component.CENTER_ALIGNMENT);
-        panelTop.setLayout(new BorderLayout());
-        panelMessageHistory.setLayout(new BoxLayout(panelMessageHistory, BoxLayout.Y_AXIS));
-        panelSendMessage.setLayout(new BorderLayout());
+        // JTextArea for displaying messages
+        messageTextArea = new JTextArea();
+        messageTextArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(messageTextArea);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
         // Create the list of messages
-        makeChatHistory(panelMessageHistory);
+        makeChatHistory();
 
         // Events
-        topButton.addActionListener(e -> {
-            if (historyOnly) {
-                // Start chat with the user
-                JOptionPane.showInputDialog("Return to the contact list, a new chat window will appear when " + receiver + " will accept the chat request");
-                app.sendUnicast("chat request", receiver.getIp(), UDPMessage.TYPEUDPMESSAGE.CHATANSWER);
-                frame.dispose();
-            } else {
-                // Stop chat with the user
-                JOptionPane.showConfirmDialog(null, "Are you sure you want to stop the chat with " + receiver + " ?", "Stop chat", JOptionPane.YES_NO_OPTION);
-                if (JOptionPane.YES_OPTION == 0) {
-                    app.sendUnicast("stop chat", receiver.getIp(), UDPMessage.TYPEUDPMESSAGE.STOPCHAT);
-                    frame.dispose();
-                }
-            }
-        });
+        topButton.addActionListener(e -> handleTopButton());
+        sendButton.addActionListener(e -> handleSendButton(messageField.getText()));
 
-        sendButton.addActionListener(e -> {
-            // Send the message to the user
-            String message = messageField.getText();
-            if (!message.isEmpty()) {
-                Date date = new Date(System.currentTimeMillis());
-                TCPMessage tcpMessage = new TCPMessage(message, app.getMe().getIp(), receiver.getIp(), date.toString(), 0);
-                app.sendMessage(tcpMessage);
-            }
-        });
+        // Add components to panels
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.add(titleLabel, BorderLayout.LINE_START);
+        topPanel.add(topButton, BorderLayout.LINE_END);
 
-        //add components
-        panelTop.add(titleLabel, BorderLayout.LINE_START);
-        panelTop.add(topButton, BorderLayout.LINE_END);
-        panelSendMessage.add(messageField, BorderLayout.CENTER);
-        panelSendMessage.add(sendButton, BorderLayout.LINE_END);
+        JPanel messagePanel = new JPanel(new BorderLayout());
+        messagePanel.add(scrollPane, BorderLayout.CENTER);
 
-        mainPanel.add(panelTop);
-        mainPanel.add(panelMessageHistory);
-        mainPanel.add(panelSendMessage);
+        JPanel sendPanel = new JPanel(new BorderLayout());
+        sendPanel.add(messageField, BorderLayout.CENTER);
+        sendPanel.add(sendButton, BorderLayout.LINE_END);
+
+        // Add panels to main panel
+        mainPanel.add(topPanel, BorderLayout.PAGE_START);
+        mainPanel.add(messagePanel, BorderLayout.CENTER);
+        mainPanel.add(sendPanel, BorderLayout.PAGE_END);
 
         frame.add(mainPanel);
         frame.setVisible(true);
-
     }
 
-    public void makeChatHistory (JPanel panelMessageHistory){
+    private void handleTopButton() {
+        if (historyOnly) {
+            // Start chat with the user
+            JOptionPane.showMessageDialog(null, "Return to the contact list, a new chat window will appear when " + receiver + " will accept the chat request");
+            app.sendUnicast("chat request", receiver.getIp(), UDPMessage.TYPEUDPMESSAGE.CHATREQUEST);
+            frame.dispose();
+        } else {
+            // Stop chat with the user
+            int option = JOptionPane.showConfirmDialog(null, "Are you sure you want to stop the chat with " + receiver + " ?", "Stop chat", JOptionPane.YES_NO_OPTION);
+            if (option == JOptionPane.YES_OPTION) {
+                app.sendUnicast("stop chat", receiver.getIp(), UDPMessage.TYPEUDPMESSAGE.STOPCHAT);
+                frame.dispose();
+            }
+        }
+    }
+
+    private void handleSendButton(String message) {
+        if (!historyOnly && !message.isEmpty()) {
+            Date date = new Date(System.currentTimeMillis());
+            TCPMessage tcpMessage = new TCPMessage(message, app.getMe().getIp(), receiver.getIp(), date.toString(), 0);
+            app.sendMessage(tcpMessage);
+            messageField.setText(""); // Clear the message field after sending
+        }
+    }
+
+    private void makeChatHistory() {
         try {
             ArrayList<TCPMessage> messages = dbController.getMessagesOf(receiver.getIp());
             for (TCPMessage message : messages) {
-                JPanel panelMessage = new JPanel();
-                JLabel dateLabel = new JLabel(message.getDate());
-                dateLabel.setFont(new Font("Arial", Font.ITALIC, 5));
-                JLabel labelMessage = new JLabel(message.getSender() + " : " + message.getContent());
-                panelMessage.add(dateLabel);
-                panelMessage.add(labelMessage);
-                if (message.getSender().toString().equals(app.getMe().getNickname())) {
-                    panelMessage.setAlignmentX(Component.RIGHT_ALIGNMENT);
-                } else {
-                    panelMessage.setAlignmentX(Component.LEFT_ALIGNMENT);
-                }
-                panelMessageHistory.add(panelMessage);
+                appendMessageToTextArea(message);
             }
         } catch (SQLException | UnknownHostException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void appendMessageToTextArea(TCPMessage message) {
+        String formattedMessage = String.format("[%s] %s: %s%n", message.getDate(), message.getSender(), message.getContent());
+        messageTextArea.append(formattedMessage);
     }
 }

@@ -49,5 +49,7 @@ public class ChatRequest {
             frame.setVisible(false);
             frame.dispose();
         });
+
+        frame.setVisible(true);
     }
 }
