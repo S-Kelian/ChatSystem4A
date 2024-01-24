@@ -80,7 +80,6 @@
                     <outputDirectory>doc/javadoc</outputDirectory>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 </project>
