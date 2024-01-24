@@ -21,12 +21,12 @@ class TCPMessageTest {
 
     @Test
     void getReceiver() throws UnknownHostException {
-        assertEquals(msgTest.getReceiver(),InetAddress.getLocalHost());
+        assertEquals(InetAddress.getLocalHost(), msgTest.getReceiver());
     }
 
     @Test
     void getSender() throws UnknownHostException {
-        assertEquals(msgTest.getSender(),InetAddress.getLocalHost());
+        assertEquals(InetAddress.getLocalHost(), msgTest.getSender());
     }
 
     @Test
