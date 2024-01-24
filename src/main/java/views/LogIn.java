@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -13,16 +14,34 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import customExceptions.UsernameEmptyException;
-import customExceptions.UsernameUsedException;
+import utils.customExceptions.UsernameEmptyException;
+import utils.customExceptions.UsernameUsedException;
 import objects.SystemApp;
 
+/**
+ * This class represents a log in window view
+ */
 public class LogIn {
 
+    /**
+     * Logger of the class LogIn
+     */
+    private final Logger LOGGER = Logger.getLogger(LogIn.class.getName());
+
+    /**
+     * SystemApp instance
+     */
     SystemApp app = SystemApp.getInstance();
 
+    /**
+     * Constructor
+     */
     public LogIn() throws SocketException, UnknownHostException {
     }
+
+    /**
+     * Create the log in window
+     */
     public void create() {
 
         JFrame frame = new JFrame("Log In");
@@ -65,6 +84,11 @@ public class LogIn {
         frame.setVisible(true);
     }
 
+    /**
+     * Handle the log in
+     * @param tf the text field
+     * @param frame the frame
+     */
     private void handleLogIn(JTextField tf, JFrame frame) {
         app.usersListUpdateRoutine();
         String nickname = tf.getText();

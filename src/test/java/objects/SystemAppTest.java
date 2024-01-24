@@ -1,7 +1,8 @@
 package objects;
 
-import customExceptions.UsernameEmptyException;
-import customExceptions.UsernameUsedException;
+import utils.customExceptions.OsNotSupportedException;
+import utils.customExceptions.UsernameEmptyException;
+import utils.customExceptions.UsernameUsedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +18,7 @@ class SystemAppTest {
     InetAddress address;
 
     @BeforeEach
-    void setUp() throws SocketException, UnknownHostException {
+    void setUp() throws SocketException, UnknownHostException, OsNotSupportedException {
         appTest = SystemApp.getInstance();
         address = appTest.getMyIp();
     }

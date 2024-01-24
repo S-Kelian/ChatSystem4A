@@ -1,31 +1,84 @@
 package views;
 
-import customExceptions.UsernameEmptyException;
-import customExceptions.UsernameUsedException;
 import objects.SystemApp;
-import objects.UDPMessage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import utils.customExceptions.UsernameEmptyException;
+import utils.customExceptions.UsernameUsedException;
 
 import javax.swing.*;
 import java.awt.*;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import static utils.TYPEUDPMESSAGE.CHATREQUEST;
+
+/**
+ * This class represents a contact list window view
+ */
 public class ContactList {
 
+    /**
+     * Logger of the class ContactList
+     */
+    private static final Logger LOGGER = LogManager.getLogger(ContactList.class);
+
+    /**
+     * SystemApp instance
+     */
     private final SystemApp app = SystemApp.getInstance();
+
+    /**
+     * DefaultListModel of the users
+     */
     private final DefaultListModel<String> usersListModel = new DefaultListModel<>();
+
+    /**
+     * JPanel of the main panel
+     */
     JPanel mainPanel;
+
+    /**
+     * JPanel of the top panel
+     */
     JPanel topPanel;
+
+    /**
+     * JPanel of the panel of online users
+     */
     JPanel panelUsersOnline;
+
+    /**
+     * JPanel of the bottom panel
+     */
     JPanel botPanel;
+
+    /**
+     * JButton of the refresh button
+     */
     private JButton refreshButton;
+
+    /**
+     * JButton of the rename button
+     */
     private JButton renameButton;
+
+    /**
+     * JButton of the disconnect button
+     */
     private JButton disconnectButton;
 
+    /**
+     * Constructor of contact list view
+     */
     public ContactList() throws SocketException, UnknownHostException {
     }
 
+    /**
+     * Create the view of the contact list
+     */
     public void create() {
+        LOGGER.info("Creating contact list window");
         JFrame frame = new JFrame("Contact List");
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1000, 1000);
@@ -49,6 +102,10 @@ public class ContactList {
         frame.setVisible(true);
     }
 
+    /**
+     * Create the top panel of the contact list
+     * @return the top panel
+     */
     private JPanel createTopPanel() {
         JPanel topPanel = new JPanel();
 
@@ -67,6 +124,10 @@ public class ContactList {
         return topPanel;
     }
 
+    /**
+     * Create the panel of online users
+     * @return the panel of online users
+     */
     private JPanel createPanelUsersOnline() {
         JPanel panelUsersOnline = new JPanel(new GridLayout(0, 1));
         JList<String> usersList = new JList<>(usersListModel);
@@ -80,6 +141,10 @@ public class ContactList {
         return panelUsersOnline;
     }
 
+    /**
+     * Create the bottom panel of the contact list
+     * @return the bottom panel
+     */
     private JPanel createBotPanel() {
         JPanel botPanel = new JPanel();
         renameButton = new JButton("Rename");
@@ -91,7 +156,11 @@ public class ContactList {
         return botPanel;
     }
 
+    /**
+     * Update the list of online users
+     */
     private void updateOnlineUsersList() {
+        LOGGER.info("Updating online users list");
         app.usersListUpdateRoutine();
         usersListModel.clear();
         app.getMyUserList().getUsersOnline().forEach(user -> {
@@ -100,6 +169,9 @@ public class ContactList {
         });
     }
 
+    /**
+     * Rename the user
+     */
     private void renameUser() {
         app.usersListUpdateRoutine();
         String newNickname = JOptionPane.showInputDialog(null, "Enter your new nickname");
@@ -107,20 +179,34 @@ public class ContactList {
             app.setMyUsername(newNickname);
             updateTopPanel();
         } catch (UsernameEmptyException | UsernameUsedException ex) {
+            LOGGER.error(ex.getMessage());
             JOptionPane.showMessageDialog(null, ex.getMessage());
         }
     }
 
+    /**
+     * Update the top panel of the contact list
+     */
     private void updateTopPanel() {
         JLabel titleLabel = (JLabel) topPanel.getComponent(0);
         titleLabel.setText("Welcome " + app.getMe().getNickname());
+        JLabel labelNumberUsersOnline = (JLabel) topPanel.getComponent(2);
+        labelNumberUsersOnline.setText("Users online: " + app.getMyUserList().getUsersOnline().size());
     }
 
+    /**
+     * Disconnect the user
+     * @param frame the frame of the contact list
+     */
     private void disconnectUser(JFrame frame) {
         app.disconnect();
         frame.dispose();
     }
 
+    /**
+     * Create the panels of users
+     * @param usersList the list of users
+     */
     private void createPanelsOfUsers(JList<String> usersList) {
         usersList.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -135,8 +221,12 @@ public class ContactList {
         });
     }
 
+    /**
+     * Open the chat with the user
+     * @param index the index of the user
+     */
     private void openChatWithUser(int index) {
-
+        LOGGER.info("Opening chat with user");
         String selectedUserNickname = usersListModel.getElementAt(index);
         String[] options = {"Open History", "Start New Conversation"};
         int choice = JOptionPane.showOptionDialog(mainPanel,
@@ -155,19 +245,27 @@ public class ContactList {
         }
     }
 
+    /**
+     * Open the history with the user
+     * @param nickname the nickname of the user
+     */
     private void openHistory(String nickname) {
         try {
             Chat chat = new Chat(nickname, true);
             chat.create();
         } catch (SocketException | UnknownHostException e) {
-            System.err.println(e.getMessage() + "User not found");
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
+    /**
+     * Open a new conversation with the user
+     * @param nickname the nickname of the user
+     */
     private void openNewConversation(String nickname) {
         app.getMyUserList().userIsInOpenedChats(app.getMyUserList().getUserByNickname(nickname).getIp());
-        app.sendUnicast("chat request", app.getMyUserList().getUserByNickname(nickname).getIp(), UDPMessage.TYPEUDPMESSAGE.CHATREQUEST);
+        app.sendUnicast("chat request", app.getMyUserList().getUserByNickname(nickname).getIp(), CHATREQUEST);
         JOptionPane.showMessageDialog(mainPanel, "Return to the contact list, a new chat window will appear when " + nickname + " will accept the chat request");
     }
 

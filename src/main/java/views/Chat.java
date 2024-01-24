@@ -3,34 +3,80 @@ package views;
 import database.DbController;
 import objects.SystemApp;
 import objects.TCPMessage;
-import objects.UDPMessage;
 import objects.User;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+import static utils.TYPEUDPMESSAGE.*;
+
+/**
+ * This class represents a chat window view
+ */
 public class Chat {
 
+    /**
+     * Logger of the class Chat
+     */
+    private static final Logger LOGGER = LogManager.getLogger(Chat.class);
+
+    /**
+     * SystemApp instance
+     */
     private final SystemApp app = SystemApp.getInstance();
+
+    /**
+     * DbController instance
+     */
     private final DbController dbController = DbController.getInstance();
+
+    /**
+     * User with whom the chat is
+     */
     private final User receiver;
-    private boolean historyOnly = false;
+
+    /**
+     * True if the chat is in history mode, false in chat mode
+     */
+    private boolean historyOnly;
+
+    /**
+     * JTextArea for displaying messages
+     */
     private JTextArea messageTextArea;
+
+    /**
+     * JTextField for writing messages
+     */
     private JTextField messageField;
+
+    /**
+     * JFrame of the chat window
+     */
     private JFrame frame;
 
+    /**
+     * Constructor
+     * @param receiverName userName with whom the chat is
+     * @param historyOnly true if the chat is in history mode, false in chat mode
+     */
     public Chat(String receiverName, boolean historyOnly) throws SocketException, UnknownHostException {
         this.receiver = app.getMyUserList().getUserByNickname(receiverName);
         this.historyOnly = historyOnly;
     }
 
+    /**
+     * Create the chat window
+     */
     public void create() {
+        LOGGER.info("Creating chat window with " + receiver.getNickname());
         frame = new JFrame("Chat with " + receiver.getNickname());
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(800, 600);
@@ -43,7 +89,7 @@ public class Chat {
         messageField = new JTextField();
         JButton sendButton = new JButton("Send");
 
-        JButton closeButton = null;
+        JButton closeButton;
         if (historyOnly) {
             closeButton = new JButton("Close");
             closeButton.addActionListener(e -> frame.dispose());
@@ -83,22 +129,29 @@ public class Chat {
         frame.setVisible(true);
     }
 
+    /**
+     * Handle the top button
+     */
     private void handleTopButton() {
         if (historyOnly) {
             // Start chat with the user
             JOptionPane.showMessageDialog(null, "Return to the contact list, a new chat window will appear when " + receiver.getNickname() + " will accept the chat request");
-            app.sendUnicast("chat request", receiver.getIp(), UDPMessage.TYPEUDPMESSAGE.CHATREQUEST);
+            app.sendUnicast("chat request", receiver.getIp(), CHATREQUEST);
             frame.dispose();
         } else {
             // Stop chat with the user
             int option = JOptionPane.showConfirmDialog(null, "Are you sure you want to stop the chat with " + receiver.getNickname() + " ?", "Stop chat", JOptionPane.YES_NO_OPTION);
             if (option == JOptionPane.YES_OPTION) {
-                app.sendUnicast("stop chat", receiver.getIp(), UDPMessage.TYPEUDPMESSAGE.STOPCHAT);
+                app.sendUnicast("stop chat", receiver.getIp(), STOPCHAT);
                 frame.dispose();
             }
         }
     }
 
+    /**
+     * Handle the send button
+     * @param message message to send
+     */
     private void handleSendButton(String message) {
         if (!historyOnly && !message.isEmpty()) {
             LocalDateTime date = LocalDateTime.now();
@@ -108,6 +161,9 @@ public class Chat {
         }
     }
 
+    /**
+     * Create the chat history
+     */
     public void makeChatHistory() {
         messageTextArea.setText("");
         try {
@@ -116,10 +172,15 @@ public class Chat {
                 appendMessageToTextArea(message);
             }
         } catch (SQLException | UnknownHostException e) {
+            LOGGER.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
+    /**
+     * Append a message to the JTextArea
+     * @param message message to append
+     */
     private void appendMessageToTextArea(TCPMessage message) {
         String formattedMessage = String.format("[%s]%n%s: %s%n%n", message.getDate(), app.getMyUserList().getUserByIp(message.getSender()).getNickname(), message.getContent());
         if (message.getSender().equals(app.getMe().getIp())) {
@@ -128,12 +189,19 @@ public class Chat {
         messageTextArea.append(formattedMessage);
     }
 
+    /**
+     * Update the chat history mode
+     */
     public void updateMode (boolean historyOnly) {
         this.historyOnly = historyOnly;
         frame.dispose();
         create();
     }
 
+    /**
+     * Get the JFrame of the chat window
+     * @return JFrame of the chat window
+     */
     public JFrame getFrame() {
         return frame;
     }

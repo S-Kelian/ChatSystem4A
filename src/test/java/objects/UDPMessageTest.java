@@ -1,17 +1,16 @@
 package objects;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static utils.TYPEUDPMESSAGE.*;
 
 class UDPMessageTest {
-    UDPMessage msgTest = new UDPMessage("test", InetAddress.getLocalHost(), InetAddress.getLocalHost(), UDPMessage.TYPEUDPMESSAGE.RESPONSE, false);
-    UDPMessage msgTest2 = new UDPMessage("test2", InetAddress.getLocalHost(), InetAddress.getLocalHost(), UDPMessage.TYPEUDPMESSAGE.REQUEST, true);
+    UDPMessage msgTest = new UDPMessage("test", InetAddress.getLocalHost(), InetAddress.getLocalHost(), RESPONSE, false);
+    UDPMessage msgTest2 = new UDPMessage("test2", InetAddress.getLocalHost(), InetAddress.getLocalHost(), REQUEST, true);
 
     UDPMessageTest() throws UnknownHostException {
     }
@@ -42,8 +41,8 @@ class UDPMessageTest {
 
     @Test
     void getTypeTest() {
-        assertEquals(UDPMessage.TYPEUDPMESSAGE.RESPONSE, msgTest.getType());
-        assertEquals(UDPMessage.TYPEUDPMESSAGE.REQUEST, msgTest2.getType());
+        assertEquals(RESPONSE, msgTest.getType());
+        assertEquals(REQUEST, msgTest2.getType());
     }
 
     @Test

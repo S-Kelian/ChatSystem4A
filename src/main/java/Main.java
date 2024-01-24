@@ -1,11 +1,10 @@
 import java.io.IOException;
-import java.net.SocketException;
 import java.sql.SQLException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import customExceptions.UserNotFoundException;
-import customExceptions.UsernameUsedException;
+import utils.customExceptions.UserNotFoundException;
+import utils.customExceptions.UsernameUsedException;
 import database.DbController;
 import network.TCPListener;
 import network.UDPListener;
@@ -13,12 +12,27 @@ import objects.SystemApp;
 import objects.TCPMessage;
 import objects.UDPMessage;
 import objects.User;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import views.LogIn;
 
+/**
+ * This class represents the main class of the application
+ */
 public class Main {
+
+    /**
+     * Logger of the class Main
+     */
+    private static final Logger LOGGER = LogManager.getLogger(Main.class);
+
+    /**
+     * Main method
+     * @param args arguments
+     */
     public static void main(String[] args) throws IOException {
 
-        System.out.println("Lancement de l'application");
+        LOGGER.info("Starting ChatSystem application");
         SystemApp app = SystemApp.getInstance();
         DbController dbController = DbController.getInstance();
         dbController.connect();
@@ -30,10 +44,8 @@ public class Main {
         udpListener.addObserver((message) -> {
             try {
                 app.receiveMessage((UDPMessage) message);
-            } catch (UserNotFoundException | UsernameUsedException | SocketException e) {
-                System.err.println(e.getMessage());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (UserNotFoundException | UsernameUsedException | IOException e) {
+                LOGGER.error(e.getMessage());
             }
         });
 
@@ -44,7 +56,7 @@ public class Main {
                 User receiver = app.getMyUserList().getUserByIp(message.getReceiver());
                 dbController.insertMessage(message.getContent(), sender.getIp().toString(), receiver.getIp().toString(), ((TCPMessage) message).getDate(), ((TCPMessage) message).getType());
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                LOGGER.error(e.getMessage());
             }
         });
         tcpListener.addObserver((message)-> {
@@ -62,6 +74,7 @@ public class Main {
             @Override
             public void run() {
                 app.usersListUpdateRoutine();
+                LOGGER.info("Automatic users list update");
             }
         }, 0, 60000);
     }
