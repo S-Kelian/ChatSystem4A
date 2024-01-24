@@ -1,12 +1,38 @@
 package objects;
 
+import network.TCPSender;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * This class represents a list of users
+ */
 public class UserList {
 
+    /**
+     * Logger of the class UserList
+     */
+  private static final Logger LOGGER = LogManager.getLogger(UserList.class);
+
+    /**
+     * List of users connected
+     */
   private final ArrayList<User> contacts;
-  
+
+    /**
+     * List of opened chats
+     */
+  private final Map<InetAddress, TCPSender> openedChats = new HashMap<>();
+
+  /**
+   * Constructor
+   * @param me the user
+   */
   public UserList(User me){
     contacts = new ArrayList<>();
     contacts.add(me);
@@ -25,8 +51,18 @@ public class UserList {
      * @param someone the user to add
      */
   public synchronized void addUser(User someone){
+    LOGGER.info("Adding user " + someone.getNickname() + " to the user list");
     contacts.add(someone);
   }
+
+  /**
+   * Add a user to the list of opened chats
+   * @param someone the user to add
+   */
+    public synchronized void addOpenedChat(InetAddress someone, TCPSender tcpSender){
+      LOGGER.info("Adding user " + someone + " to the list of opened chats");
+      openedChats.put(someone, tcpSender);
+    }
 
   /**
    * Update the status of a user
@@ -38,7 +74,7 @@ public class UserList {
     if (someone != null){
       someone.setStatus(status);
     } else {
-      System.out.println("User not found");
+      LOGGER.error("User " + someonesAddress + " not found in the list");
     }
   }
 
@@ -114,7 +150,7 @@ public class UserList {
         if (matchingUser == null){
           matchingUser = user;
         } else{
-          System.out.println("Multiple users with the same nickname");
+          LOGGER.error("Multiple users with the same nickname");
           return matchingUser; // so far the problem of multiple users with same nickname is noticed but not resolved
         }
       }
@@ -134,5 +170,25 @@ public class UserList {
         }
     }
     return usersOnline;
+  }
+
+  /**
+  * Check if a user is in the list of opened chats
+  */
+  public synchronized boolean userIsInOpenedChats(InetAddress someone) {
+    for (InetAddress user : openedChats.keySet()) {
+      if (user.equals(someone)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public Map<InetAddress, TCPSender> getOpenedChats() {
+    return openedChats;
+  }
+
+  public void removeOpenedChat(InetAddress sender) {
+    openedChats.remove(sender);
   }
 }

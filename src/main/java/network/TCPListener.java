@@ -1,50 +1,103 @@
 package network;
 
-import java.io.BufferedReader;
+import objects.TCPMessage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * TCPListener (server) class
+ * Listens to TCP messages
+ */
+public class TCPListener extends Thread {
 
-public class TCPListener {
+    /**
+     * Logger of the class TCPListener
+     */
+    private static final Logger LOGGER = LogManager.getLogger(TCPListener.class);
 
-    private ServerSocket serverSocket;
-    private Socket clientSocket;
-    private PrintWriter out;
-    private BufferedReader in;
+    /**
+     * Socket of the TCPListener
+     */
+    private final ServerSocket serverSocket;
 
-    public void start(int port) throws IOException {
-        serverSocket = new ServerSocket(port);
-        clientSocket = serverSocket.accept();
-        out = new PrintWriter(clientSocket.getOutputStream(), true);
-        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        String greeting = in.readLine();
-        System.out.println(greeting);
+    /**
+     * List of observers
+     */
+    private static final List<Observer> observers = new ArrayList<>();
 
-        if ("hello server".equals(greeting)) {
-            out.println("hello client");
-        }
-        else {
-            out.println("unrecognised greeting");
-        }
-    }
-
-    public void stop() throws IOException {
-        in.close();
-        out.close();
-        clientSocket.close();
-        serverSocket.close();
-    }
-    
-    public static void main(String[] args) {
-        TCPListener server=new TCPListener();
+    /**
+     * Constructor of the TCPListener
+     * @param port port of the listener
+     */
+    public TCPListener(int port) {
         try {
-            server.start(6666);
+            serverSocket = new ServerSocket(port);
+            LOGGER.info("TCPListener started on port " + port);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Add an observer to the list of observers
+     * @param observer observer to add
+     */
+    public void addObserver(Observer observer) {
+        synchronized (observers) {
+            LOGGER.info("New observer added");
+            observers.add(observer);
+        }
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                new ClientHandler(serverSocket.accept()).start();
+                LOGGER.info("New client connected");
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage());
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    /**
+     * ClientHandler class
+     * Handles the client
+     */
+    private static class ClientHandler extends Thread {
+        private final Socket clientSocket;
+        public ClientHandler(Socket socket) {
+            this.clientSocket = socket;
+        }
+
+        public void run() {
+            try {
+                ObjectInputStream objectIn = new ObjectInputStream(clientSocket.getInputStream());
+
+                TCPMessage inputMessage;
+                while ((inputMessage = (TCPMessage) objectIn.readObject()) != null) {
+                    LOGGER.info("Received message: " + inputMessage.toString());
+                    synchronized (observers) {
+                        for (Observer observer : observers) {
+                            observer.handle(inputMessage);
+                        }
+                    }
+                }
+
+            } catch (IOException | ClassNotFoundException e) {
+                LOGGER.error(e.getMessage());
+                throw new RuntimeException(e);
+            }
         }
     }
 }
-
