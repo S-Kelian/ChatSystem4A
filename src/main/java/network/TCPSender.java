@@ -26,7 +26,7 @@ public class TCPSender {
      * Add an observer to the list of observers
      * @param observer observer to add
      */
-    public void addObserver(Observer observer) {
+    public synchronized void addObserver(Observer observer) {
         synchronized (observers) {
             LOGGER.info("New observer added");
             observers.add(observer);
@@ -38,7 +38,7 @@ public class TCPSender {
      * @param ip ip of the connection
      * @param port port of the connection
      */
-    public void startConnection(String ip, int port) throws IOException {
+    public synchronized void startConnection(String ip, int port) throws IOException {
         LOGGER.info("Starting TCP connection with " + ip + " on port " + port);
         if (ip.startsWith("/")) {
             ip = ip.substring(1);
@@ -51,7 +51,7 @@ public class TCPSender {
      * Send a TCP message
      * @param msg message to send
      */
-    public void sendMessage(TCPMessage msg) throws IOException {
+    public synchronized void sendMessage(TCPMessage msg) throws IOException {
         LOGGER.info("Sending message " + msg.toString());
         objectOut.writeObject(msg);
         for (Observer observer : observers) {

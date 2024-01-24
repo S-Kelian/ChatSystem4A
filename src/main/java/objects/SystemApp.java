@@ -69,7 +69,7 @@ public class SystemApp {
      */
     private SystemApp() throws SocketException, UnknownHostException {
         LOGGER.info("SystemApp started");
-        InetAddress address = null;
+        InetAddress address;
         try {
             address = getMyIp();
         } catch (OsNotSupportedException e) {
@@ -270,6 +270,7 @@ public class SystemApp {
             case CHATANSWER -> {
                 if (message.getContent().equals("RequestAccepted")) {
                     TCPSender tcpSender = new TCPSender();
+                    addObservers(tcpSender);
                     try {
                         tcpSender.startConnection(message.getSender().toString(), 49002);
                     } catch (IOException e) {
@@ -357,7 +358,7 @@ public class SystemApp {
         LOGGER.info("Sending message : " + tcpMessage.toString());
         try {
             myUserList.getOpenedChats().get(tcpMessage.getReceiver()).sendMessage(tcpMessage);
-            mapChat.get(myUserList.getUserByIp(tcpMessage.getReceiver()).getNickname()).makeChatHistory();
+            updateChatHistory(tcpMessage);
         } catch (IOException e) {
             LOGGER.error(e.getMessage());
             throw new RuntimeException(e);

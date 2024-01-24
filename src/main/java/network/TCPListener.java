@@ -87,8 +87,10 @@ public class TCPListener extends Thread {
                 TCPMessage inputMessage;
                 while ((inputMessage = (TCPMessage) objectIn.readObject()) != null) {
                     LOGGER.info("Received message: " + inputMessage.toString());
-                    for (Observer observer : observers) {
-                        observer.handle(inputMessage);
+                    synchronized (observers) {
+                        for (Observer observer : observers) {
+                            observer.handle(inputMessage);
+                        }
                     }
                 }
 

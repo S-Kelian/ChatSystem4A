@@ -155,7 +155,8 @@ public class Chat {
     private void handleSendButton(String message) {
         if (!historyOnly && !message.isEmpty()) {
             LocalDateTime date = LocalDateTime.now();
-            TCPMessage tcpMessage = new TCPMessage(message, app.getMe().getIp(), receiver.getIp(), date.toString(), 0);
+            String formattedDate = String.format("%02d/%02d/%d %02d:%02d", date.getDayOfMonth(), date.getMonthValue(), date.getYear(), date.getHour(), date.getMinute());
+            TCPMessage tcpMessage = new TCPMessage(message, app.getMe().getIp(), receiver.getIp(), formattedDate, 0);
             app.sendMessage(tcpMessage);
             messageField.setText(""); // Clear the message field after sending
         }
