@@ -16,9 +16,8 @@ echo 'export PATH=~/bin/apache-maven-3.9.5/bin:$PATH' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-You will need to extract the downloaded zip/tar.gz file and open a terminal where you extracted it.
 
-Use the following command lines on your machine to launch the app:
+Use the following command lines on your machine to compile and launch the app:
 
 ```bash
 mvn clean package
