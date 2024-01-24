@@ -22,6 +22,7 @@ public class SystemApp {
         InetAddress address = getMyIp();
 
         this.me = new User(address.toString(), address);
+        System.out.println(me);
         this.udpSender = new UDPSender(me.getIp());
         myUserList = new UserList(me);
 

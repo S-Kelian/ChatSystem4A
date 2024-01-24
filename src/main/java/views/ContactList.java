@@ -28,7 +28,7 @@ public class ContactList {
     public void create() {
         JFrame frame = new JFrame("Contact List");
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setSize(1000, 1000);
 
         mainPanel = new JPanel(new BorderLayout());
         topPanel = createTopPanel();
@@ -51,12 +51,17 @@ public class ContactList {
 
     private JPanel createTopPanel() {
         JPanel topPanel = new JPanel();
+
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
+
         JLabel titleLabel = new JLabel("Welcome " + app.getMe().getNickname());
         JLabel labelNumberUsersOnline = new JLabel("Users online: " + app.getMyUserList().getUsersOnline().size());
         refreshButton = new JButton("Refresh");
 
         topPanel.add(titleLabel);
+        topPanel.add(Box.createHorizontalGlue());
         topPanel.add(labelNumberUsersOnline);
+        topPanel.add(Box.createHorizontalGlue());
         topPanel.add(refreshButton);
 
         return topPanel;
@@ -90,7 +95,8 @@ public class ContactList {
         app.usersListUpdateRoutine();
         usersListModel.clear();
         app.getMyUserList().getUsersOnline().forEach(user -> {
-            usersListModel.addElement(user.getNickname());
+            if (!user.getNickname().equals(app.getMe().getNickname()))
+                usersListModel.addElement(user.getNickname());
         });
     }
 
@@ -99,10 +105,15 @@ public class ContactList {
         String newNickname = JOptionPane.showInputDialog(null, "Enter your new nickname");
         try {
             app.setMyUsername(newNickname);
-            topPanel.getComponent(0).setName("Welcome " + app.getMe().getNickname());
+            updateTopPanel();
         } catch (UsernameEmptyException | UsernameUsedException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage());
         }
+    }
+
+    private void updateTopPanel() {
+        JLabel titleLabel = (JLabel) topPanel.getComponent(0);
+        titleLabel.setText("Welcome " + app.getMe().getNickname());
     }
 
     private void disconnectUser(JFrame frame) {
@@ -138,26 +149,26 @@ public class ContactList {
                 options[0]);
 
         if (choice == 0) {
-            openHistory(index);
+            openHistory(selectedUserNickname);
         } else if (choice == 1) {
-            openNewConversation(index);
+            openNewConversation(selectedUserNickname);
         }
     }
 
-    private void openHistory(int index) {
-        String ip = app.getMyUserList().getUsersOnline().get(index).getIp().toString();
+    private void openHistory(String nickname) {
         try {
-            Chat chat = new Chat(ip, true);
+            Chat chat = new Chat(nickname, true);
             chat.create();
         } catch (SocketException | UnknownHostException e) {
+            System.err.println(e.getMessage() + "User not found");
             e.printStackTrace();
         }
     }
 
-    private void openNewConversation(int index) {
-        app.getMyUserList().userIsInOpenedChats(app.getMyUserList().getUsersOnline().get(index).getIp());
-        app.sendUnicast("chat request", app.getMyUserList().getUsersOnline().get(index).getIp(), UDPMessage.TYPEUDPMESSAGE.CHATREQUEST);
-        JOptionPane.showMessageDialog(mainPanel, "Return to the contact list, a new chat window will appear when " + app.getMyUserList().getUsersOnline().get(index).getNickname() + " will accept the chat request");
+    private void openNewConversation(String nickname) {
+        app.getMyUserList().userIsInOpenedChats(app.getMyUserList().getUserByNickname(nickname).getIp());
+        app.sendUnicast("chat request", app.getMyUserList().getUserByNickname(nickname).getIp(), UDPMessage.TYPEUDPMESSAGE.CHATREQUEST);
+        JOptionPane.showMessageDialog(mainPanel, "Return to the contact list, a new chat window will appear when " + nickname + " will accept the chat request");
     }
 
 

@@ -8,6 +8,7 @@ import objects.User;
 
 import javax.swing.*;
 import java.awt.*;
+import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.sql.Date;
@@ -22,8 +23,9 @@ public class Chat {
     private final User receiver;
     private boolean historyOnly = false;
 
-    public Chat(String receiverIP, boolean historyOnly) throws SocketException, UnknownHostException {
-        this.receiver = app.getMyUserList().getUserByNickname(receiverIP);
+    public Chat(String receiverName, boolean historyOnly) throws SocketException, UnknownHostException {
+        this.receiver = app.getMyUserList().getUserByNickname(receiverName);
+        System.out.println("Chat with " + receiver.getNickname());
         this.historyOnly = historyOnly;
     }
 

@@ -39,5 +39,8 @@ public class User{
     public InetAddress getIp(){
         return this.ip;
     }
-    
+
+    public String toString(){
+        return "Nickname: " + this.nickname + " IP: " + this.ip + " Status: " + this.status;
+    }
 }
