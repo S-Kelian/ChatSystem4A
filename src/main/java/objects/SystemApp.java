@@ -326,7 +326,6 @@ public class SystemApp {
         String os = System.getProperty("os.name");
         InetAddress address = null;
         if (os.equals("Linux")) {
-            System.out.println("Linux");
             Enumeration<NetworkInterface> nics = NetworkInterface
                     .getNetworkInterfaces();
             while (nics.hasMoreElements()) {
@@ -335,14 +334,12 @@ public class SystemApp {
                 while (addrs.hasMoreElements()) {
                     InetAddress addr = addrs.nextElement();
                     if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
-                        System.out.println(addr.getHostAddress());
                         address = InetAddress.getByName(addr.getHostAddress());
                         break;
                     }
                 }
             }
         } else if (os.startsWith("Windows")) {
-            System.out.println("Windows");
             address = InetAddress.getLocalHost();
         } else {
             LOGGER.error("OS not supported");

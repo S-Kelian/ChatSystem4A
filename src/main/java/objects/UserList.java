@@ -50,8 +50,8 @@ public class UserList {
      * Add a user to the list
      * @param someone the user to add
      */
-  public synchronized void addUser(User someone){
-    LOGGER.info("Adding user " + someone.getNickname() + " to the user list");
+  public void addUser(User someone){
+    LOGGER.info("Adding user " + someone.getNickname() + " with ip "+ someone.getIp() +" to the user list");
     contacts.add(someone);
   }
 
@@ -59,7 +59,7 @@ public class UserList {
    * Add a user to the list of opened chats
    * @param someone the user to add
    */
-    public synchronized void addOpenedChat(InetAddress someone, TCPSender tcpSender){
+    public void addOpenedChat(InetAddress someone, TCPSender tcpSender){
       LOGGER.info("Adding user " + someone + " to the list of opened chats");
       openedChats.put(someone, tcpSender);
     }

@@ -74,7 +74,7 @@ public class DbController {
      * @param date date of the message
      * @param type type of the message
      */
-    public void insertMessage(String content, String sender, String receiver, String date, int type) throws SQLException {
+    public synchronized void insertMessage(String content, String sender, String receiver, String date, int type) throws SQLException {
         LOGGER.info("Inserting message : " + content + " from " + sender + " to " + receiver + " at " + date + " of type " + type + " in database");
         String sql = "INSERT INTO messages (content, sender, receiver, date, type) VALUES ('" + content + "', '" + sender + "', '" + receiver + "', '" + date + "', " + type + ")";
         Statement statement = conn.createStatement();
@@ -88,7 +88,7 @@ public class DbController {
      * @param ip ip of the user
      * @return list of messages with the user
      */
-    public ArrayList<TCPMessage> getMessagesOf(InetAddress ip) throws SQLException, UnknownHostException {
+    public synchronized ArrayList<TCPMessage> getMessagesOf(InetAddress ip) throws SQLException, UnknownHostException {
         LOGGER.info("Getting messages of " + ip.toString() + " from database");
         String sql = "SELECT * FROM messages WHERE sender = '" + ip.toString() + "' OR receiver = '" + ip + "'";
         Statement statement = conn.createStatement();

@@ -59,7 +59,6 @@
                             <mainClass>Main</mainClass>
                         </manifest>
                     </archive>
-                    <finalName>${project.artifactId}-${project.version}</finalName>
                 </configuration>
                 <executions>
                     <execution>

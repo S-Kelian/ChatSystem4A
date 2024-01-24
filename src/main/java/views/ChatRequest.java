@@ -65,14 +65,12 @@ public class ChatRequest {
         yesButton.addActionListener(e -> {
             LOGGER.info("Chat request accepted");
             app.sendUnicast("RequestAccepted", app.getMyUserList().getUserByNickname(nameOfAsker).getIp(), CHATANSWER);
-            frame.setVisible(false);
             frame.dispose();
         });
 
         noButton.addActionListener(e -> {
             LOGGER.info("Chat request refused");
             app.sendUnicast("RequestRefused", app.getMyUserList().getUserByNickname(nameOfAsker).getIp(), CHATANSWER);
-            frame.setVisible(false);
             frame.dispose();
         });
 
