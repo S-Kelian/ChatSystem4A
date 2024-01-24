@@ -45,6 +45,12 @@ java -jar target/ChatSytem-1.0-SNAPSHOT-jar-with-dependencies.jar
 
 The app is able to run on Linux and on Windows and no compatibility problem has been found yet, if so, please notify us by sending an email to <sebaici@insa-toulouse.fr> and <zenou-trucho@insa-toulouse.fr>. You can also contact us if you find a bug.
 
+## Known bugs
+- Number of userConnect not updated
+- Message send twice with same session using SSH
+- Stop Chat Session doesn't work sometimes
+- Auto disconnect
+
 ## Documentation and reports
 
 You can find all reports and documentation in the [doc folder](doc):
