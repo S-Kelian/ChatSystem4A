@@ -9,13 +9,18 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ContactList {
 
     private final SystemApp app = SystemApp.getInstance();
-    private final List<JLabel> usersOnline = new ArrayList<>();
+    private final DefaultListModel<String> usersListModel = new DefaultListModel<>();
+    JPanel mainPanel;
+    JPanel topPanel;
+    JPanel panelUsersOnline;
+    JPanel botPanel;
+    private JButton refreshButton;
+    private JButton renameButton;
+    private JButton disconnectButton;
 
     public ContactList() throws SocketException, UnknownHostException {
     }
@@ -25,64 +30,68 @@ public class ContactList {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        JPanel mainPanel = new JPanel(new BorderLayout());
-        JPanel topPanel = new JPanel();
-        JLabel titleLabel = new JLabel("Welcome " + app.getMe().getNickname());
-        JPanel panelUsersOnline = new JPanel(new BorderLayout());
-        JLabel labelNumberUsersOnline = new JLabel("Users online: " + app.getMyUserList().getUsersOnline().size());
-        JButton refresh = new JButton("Refresh");
-        JPanel botPanel = new JPanel();
-        JButton rename = new JButton("Rename");
-        JButton disconnect = new JButton("Disconnect");
-
-        // Set properties
-        topPanel.add(titleLabel, BorderLayout.CENTER);
-        topPanel.add(labelNumberUsersOnline, BorderLayout.PAGE_END);
-
-        panelUsersOnline.add(refresh, BorderLayout.PAGE_END);
-
-        botPanel.add(rename);
-        botPanel.add(disconnect);
+        mainPanel = new JPanel(new BorderLayout());
+        topPanel = createTopPanel();
+        panelUsersOnline = createPanelUsersOnline();
+        botPanel = createBotPanel();
 
         mainPanel.add(topPanel, BorderLayout.PAGE_START);
-        mainPanel.add(panelUsersOnline, BorderLayout.CENTER);
+        mainPanel.add(new JScrollPane(panelUsersOnline), BorderLayout.CENTER);
         mainPanel.add(botPanel, BorderLayout.PAGE_END);
         frame.add(mainPanel);
 
-        // Create the list of online users
-        createPanelsOfUsers(panelUsersOnline);
-
         // Events
-        refresh.addActionListener(e -> {
-            // Refresh the list of online users
-            updateOnlineUsersList(panelUsersOnline, labelNumberUsersOnline);
-        });
-
-        rename.addActionListener(e -> {
-            // Rename the user
-            renameUser();
-        });
-
-        disconnect.addActionListener(e -> {
-            // Disconnect the user and close the chat system
-            app.disconnect();
-            frame.dispose();
-        });
+        refreshButton.addActionListener(e -> updateOnlineUsersList());
+        renameButton.addActionListener(e -> renameUser());
+        disconnectButton.addActionListener(e -> disconnectUser(frame));
 
         // Making the window visible
         frame.setVisible(true);
     }
 
-    private void updateOnlineUsersList(JPanel panelUsersOnline, JLabel labelUsersOnline) {
+    private JPanel createTopPanel() {
+        JPanel topPanel = new JPanel();
+        JLabel titleLabel = new JLabel("Welcome " + app.getMe().getNickname());
+        JLabel labelNumberUsersOnline = new JLabel("Users online: " + app.getMyUserList().getUsersOnline().size());
+        refreshButton = new JButton("Refresh");
+
+        topPanel.add(titleLabel);
+        topPanel.add(labelNumberUsersOnline);
+        topPanel.add(refreshButton);
+
+        return topPanel;
+    }
+
+    private JPanel createPanelUsersOnline() {
+        JPanel panelUsersOnline = new JPanel(new GridLayout(0, 1));
+        JList<String> usersList = new JList<>(usersListModel);
+        usersList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        usersList.setLayoutOrientation(JList.VERTICAL);
+        panelUsersOnline.add(usersList);
+
+        // Create the list of online users
+        createPanelsOfUsers(usersList);
+
+        return panelUsersOnline;
+    }
+
+    private JPanel createBotPanel() {
+        JPanel botPanel = new JPanel();
+        renameButton = new JButton("Rename");
+        disconnectButton = new JButton("Disconnect");
+
+        botPanel.add(renameButton);
+        botPanel.add(disconnectButton);
+
+        return botPanel;
+    }
+
+    private void updateOnlineUsersList() {
         app.usersListUpdateRoutine();
-        usersOnline.clear();
-        panelUsersOnline.removeAll();
-        labelUsersOnline.setText("Users online: " + app.getMyUserList().getUsersOnline().size());
-        panelUsersOnline.add(labelUsersOnline, BorderLayout.PAGE_START);
-        panelUsersOnline.add(new JButton("Refresh"), BorderLayout.PAGE_END);
-        createPanelsOfUsers(panelUsersOnline);
-        panelUsersOnline.revalidate();
-        panelUsersOnline.repaint();
+        usersListModel.clear();
+        app.getMyUserList().getUsersOnline().forEach(user -> {
+            usersListModel.addElement(user.getNickname());
+        });
     }
 
     private void renameUser() {
@@ -90,49 +99,66 @@ public class ContactList {
         String newNickname = JOptionPane.showInputDialog(null, "Enter your new nickname");
         try {
             app.setMyUsername(newNickname);
-            // Update UI with new nickname
+            topPanel.getComponent(0).setName("Welcome " + app.getMe().getNickname());
         } catch (UsernameEmptyException | UsernameUsedException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage());
         }
     }
 
-    private void createPanelsOfUsers(JPanel panelUsersOnline) {
-        for (int i = 0; i < app.getMyUserList().getUsersOnline().size(); i++) {
-            JPanel userPanel = new JPanel();
-            JLabel userLabel = new JLabel(app.getMyUserList().getUsersOnline().get(i).getNickname());
-            JButton connectButton = new JButton("Connect");
-            JButton historyButton = new JButton("History");
+    private void disconnectUser(JFrame frame) {
+        app.disconnect();
+        frame.dispose();
+    }
 
-            // Add "(you)" to the label of the current user and add an event to the button for other users
-            if (app.getMyUserList().getUsersOnline().get(i).getNickname().equals(app.getMe().getNickname())) {
-                userLabel.setText(userLabel.getText() + " (you)");
-            } else {
-                addEventListenersForOtherUsers(connectButton, historyButton, i);
-                userPanel.add(connectButton);
-                userPanel.add(historyButton);
+    private void createPanelsOfUsers(JList<String> usersList) {
+        usersList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                JList<String> list = (JList<String>) evt.getSource();
+                if (evt.getClickCount() == 2) {
+                    int index = list.locationToIndex(evt.getPoint());
+                    if (index != -1) {
+                        openChatWithUser(index);
+                    }
+                }
             }
-            userPanel.add(userLabel);
-            panelUsersOnline.add(userPanel);
+        });
+    }
+
+    private void openChatWithUser(int index) {
+
+        String selectedUserNickname = usersListModel.getElementAt(index);
+        String[] options = {"Open History", "Start New Conversation"};
+        int choice = JOptionPane.showOptionDialog(mainPanel,
+                "Choose an action for " + selectedUserNickname,
+                "Chat Options",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]);
+
+        if (choice == 0) {
+            openHistory(index);
+        } else if (choice == 1) {
+            openNewConversation(index);
         }
     }
 
-    private void addEventListenersForOtherUsers(JButton connectButton, JButton historyButton, int index) {
-        connectButton.addActionListener(e -> {
-            // Ask the user if they want to open a chat with the selected user
-            app.getMyUserList().userIsInOpenedChats(app.getMyUserList().getUsersOnline().get(index).getIp());
-            app.sendUnicast("chat request", app.getMyUserList().getUsersOnline().get(index).getIp(), UDPMessage.TYPEUDPMESSAGE.CHATREQUEST);
-            JOptionPane.showInputDialog("An invitation has been sent to " + app.getMyUserList().getUsersOnline().get(index).getNickname() + ".\n A new chat will be opened if he accept.");
-        });
-
-        historyButton.addActionListener(e -> {
-            // Open the history of the selected user
-            String ip = app.getMyUserList().getUsersOnline().get(index).getIp().toString();
-            try {
-                Chat chat = new Chat(ip, true);
-                chat.create();
-            } catch (SocketException | UnknownHostException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+    private void openHistory(int index) {
+        String ip = app.getMyUserList().getUsersOnline().get(index).getIp().toString();
+        try {
+            Chat chat = new Chat(ip, true);
+            chat.create();
+        } catch (SocketException | UnknownHostException e) {
+            e.printStackTrace();
+        }
     }
+
+    private void openNewConversation(int index) {
+        app.getMyUserList().userIsInOpenedChats(app.getMyUserList().getUsersOnline().get(index).getIp());
+        app.sendUnicast("chat request", app.getMyUserList().getUsersOnline().get(index).getIp(), UDPMessage.TYPEUDPMESSAGE.CHATREQUEST);
+        JOptionPane.showMessageDialog(mainPanel, "Return to the contact list, a new chat window will appear when " + app.getMyUserList().getUsersOnline().get(index).getNickname() + " will accept the chat request");
+    }
+
+
 }
