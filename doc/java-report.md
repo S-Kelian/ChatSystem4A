@@ -10,7 +10,12 @@
 
 ## Testing policy
 
-- e
+- Unit Testing:
+
+We employ JUnit for unit testing to validate the functionality of individual components (User, UserList, TCP and UDP Message).
+
+
+
 
 ## Highlight
 
