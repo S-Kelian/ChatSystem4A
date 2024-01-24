@@ -44,4 +44,9 @@ class UserTest {
         assertEquals("/127.0.0.1", userTest.getIp().toString());
     }
 
+    @Test
+    void testToStringTest() {
+        assertEquals("Nickname: test IP: " + userTest.getIp() + " Status: " + userTest.getStatus(), userTest.toString());
+    }
+
 }

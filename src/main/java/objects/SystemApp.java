@@ -123,7 +123,7 @@ public class SystemApp {
             throw new UsernameEmptyException("Nickname is empty");
         }
         // Now that we know that the nickname us valid, we need to check if it is already taken
-        if (myUserList.UserIsInListByNickmane(nickname)){
+        if (myUserList.userIsInListByNickmane(nickname)){
             LOGGER.error("Nickname already taken");
             throw new UsernameUsedException("Nickname already taken");
         }
@@ -141,13 +141,13 @@ public class SystemApp {
      */
     public void setSomeoneUsername(InetAddress address, String newNn) throws UserNotFoundException, UsernameUsedException { // the success of the operation is returned as an int equal to 0 if success and 1 if the user is not in the list and 2 if the nickname is already taken
         // if the user is not in the list, we add him
-        if (!myUserList.UserIsInListByIp(address)){
+        if (!myUserList.userIsInListByIp(address)){
             myUserList.addUser(new User(newNn, address));
             LOGGER.error("user not in list");
             throw new UserNotFoundException("error 404 user not found");
         }
         // if the user is in the list but with a different nickname, we update his nickname if it is not already taken
-        if(!myUserList.UserIsInListByNickmane(newNn)){
+        if(!myUserList.userIsInListByNickmane(newNn)){
             LOGGER.info("Nickname updated");
             myUserList.updateNickname(address, newNn);
             return;
@@ -240,7 +240,7 @@ public class SystemApp {
                 // get the nickname of the user and add it to the list of users online if it is not already in it
                 String nickname = message.getContent().substring(23);
                 InetAddress address = message.getSender();
-                if (!myUserList.UserIsInListByIp(address)) {
+                if (!myUserList.userIsInListByIp(address)) {
                     User user = new User(nickname, address);
                     myUserList.addUser(user);
                 } else {
@@ -310,6 +310,7 @@ public class SystemApp {
     public void disconnect() {
         LOGGER.info("Disconnecting user");
         sendBroadcast("disconnect", DISCONNECTION);
+        dbController.disconnect();
         System.exit(0);
     }
 

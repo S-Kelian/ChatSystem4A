@@ -83,7 +83,7 @@ public class UserList {
      * @param nickname the nickname of the user to check
      * @return true if the user is in the list, false otherwise
      */
-  public synchronized boolean UserIsInListByNickmane(String nickname) {
+  public synchronized boolean userIsInListByNickmane(String nickname) {
         for (User user : contacts) {
             if (user.getNickname().equals(nickname)) {
                 return true;
@@ -97,7 +97,7 @@ public class UserList {
    * @param ipAddress the ip address of the user to check
    * @return true if the user is in the list, false otherwise
    */
-  public synchronized boolean UserIsInListByIp(InetAddress ipAddress) {
+  public synchronized boolean userIsInListByIp(InetAddress ipAddress) {
     for (User user : contacts) {
         if (user.getIp().equals(ipAddress)) {
             return true;
@@ -117,7 +117,7 @@ public class UserList {
     if (someone == null){
       return 1; // return code 1 is used when the user is not in the list
     }
-    if (UserIsInListByNickmane(newNickname)){
+    if (userIsInListByNickmane(newNickname)){
       return 2; // return code 2 is used when the nickname is already taken
     }
     someone.setNickname(newNickname);
