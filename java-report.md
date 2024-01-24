@@ -14,8 +14,8 @@
 
 ## Highlight
 
-- TCP messages contain java objects. This makes the messages heavier but it allows a lot of functionnalities :
+- UDP and TCP sockets exchange java objects created from the message interface in order to make really easy the implementation of features such as :
   - Easy use of timestamps
   - Easy to send different types of documents with the "type" attribute
-
+  
 - The contact list updates by itself to avoid conflicts. If by any chance some of the connected users would have his application crashing and as a consequence not sending the "DISCONNECT" message to update others contact lists, the contact list of other users update periodically by sending an update request using UDP in broadcast mode and being answered with UDP unicast messages. We had to make sure that those request are not too frequent in order not to overuse the network.
