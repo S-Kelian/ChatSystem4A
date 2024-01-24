@@ -32,6 +32,8 @@ public class Main {
                 app.receiveMessage((UDPMessage) message);
             } catch (UserNotFoundException | UsernameUsedException | SocketException e) {
                 System.err.println(e.getMessage());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         });
 
@@ -40,12 +42,14 @@ public class Main {
             try {
                 User sender = app.getMyUserList().getUserByIp(message.getSender());
                 User receiver = app.getMyUserList().getUserByIp(message.getReceiver());
-                dbController.insertMessage(message.getContent(), sender.getNickname(), receiver.getNickname(), ((TCPMessage) message).getDate(), ((TCPMessage) message).getType());
+                dbController.insertMessage(message.getContent(), sender.getIp().toString(), receiver.getIp().toString(), ((TCPMessage) message).getDate(), ((TCPMessage) message).getType());
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         });
-
+        tcpListener.addObserver((message)-> {
+                app.updateChatHistory((TCPMessage) message);
+        });
 
         udpListener.start();
         tcpListener.start();

@@ -11,7 +11,7 @@ import java.util.List;
 public class TCPListener extends Thread {
 
     private final ServerSocket serverSocket;
-    private final List<Observer> observers = new ArrayList<>();
+    private static final List<Observer> observers = new ArrayList<>();
 
     public TCPListener(int port) {
         try {
@@ -22,8 +22,8 @@ public class TCPListener extends Thread {
     }
 
     public void addObserver(Observer observer) {
-        synchronized (this.observers) {
-            this.observers.add(observer);
+        synchronized (observers) {
+            observers.add(observer);
         }
     }
 
@@ -31,25 +31,21 @@ public class TCPListener extends Thread {
     public void run() {
         while (true) {
             try {
-                new EchoClientHandler(serverSocket.accept(), observers).start();
+                new ClientHandler(serverSocket.accept()).start();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    private static class EchoClientHandler extends Thread {
+    private static class ClientHandler extends Thread {
         private final Socket clientSocket;
-        private final List<Observer> observers;
-
-        public EchoClientHandler(Socket socket, List<Observer> observers) {
+        public ClientHandler(Socket socket) {
             this.clientSocket = socket;
-            this.observers = observers;
         }
 
         public void run() {
             try {
-                ObjectOutputStream objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
                 ObjectInputStream objectIn = new ObjectInputStream(clientSocket.getInputStream());
 
                 TCPMessage inputMessage;
@@ -59,9 +55,6 @@ public class TCPListener extends Thread {
                     }
                 }
 
-                objectIn.close();
-                objectOut.close();
-                clientSocket.close();
             } catch (IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }

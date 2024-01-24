@@ -46,22 +46,18 @@ public class DbController {
         String sql = "INSERT INTO messages (content, sender, receiver, date, type) VALUES ('" + content + "', '" + sender + "', '" + receiver + "', '" + date + "', " + type + ")";
         Statement statement = conn.createStatement();
         statement.executeUpdate(sql);
-    }
 
-    public void createTable() throws SQLException {
-        String sql = "Create table if not exists messages (id int primary key, content varchar(255), sender varchar(255), receiver varchar(255), date varchar(255), type int)";
-        Statement statement = conn.createStatement();
-        statement.executeUpdate(sql);
+        System.out.println("\n Message inserted \n");
     }
 
     public ArrayList<TCPMessage> getMessagesOf(InetAddress ip) throws SQLException, UnknownHostException {
-        String sql = "SELECT * FROM messages WHERE sender = '" + ip.toString() + "' OR receiver = '" + ip.toString() + "'";
+        String sql = "SELECT * FROM messages WHERE sender = '" + ip.toString() + "' OR receiver = '" + ip + "'";
         Statement statement = conn.createStatement();
         ResultSet rs = statement.executeQuery(sql);
         ArrayList<TCPMessage> messages = new ArrayList<>();
         while (rs.next()) {
-            InetAddress sender = InetAddress.getByName(rs.getString("sender"));
-            InetAddress receiver = InetAddress.getByName(rs.getString("receiver"));
+            InetAddress sender = InetAddress.getByName(rs.getString("sender").substring(1));
+            InetAddress receiver = InetAddress.getByName(rs.getString("receiver").substring(1));
             messages.add(new TCPMessage(rs.getString("content"),sender, receiver, rs.getString("date"), rs.getInt("type")));
         }
         return messages;

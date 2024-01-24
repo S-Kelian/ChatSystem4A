@@ -1,7 +1,6 @@
 package views;
 
 import objects.SystemApp;
-import objects.UDPMessage;
 
 import javax.swing.*;
 import java.net.SocketException;

@@ -3,20 +3,29 @@ package objects;
 import customExceptions.UserNotFoundException;
 import customExceptions.UsernameEmptyException;
 import customExceptions.UsernameUsedException;
+import database.DbController;
+import network.Observer;
 import network.TCPSender;
 import network.UDPSender;
+import views.Chat;
 import views.ChatRequest;
 
 import javax.swing.*;
 import java.io.IOException;
 import java.net.*;
+import java.sql.SQLException;
 import java.util.Enumeration;
+import java.util.HashMap;
 
 public class SystemApp {
     private final User me;
     private final UserList myUserList;
     private final UDPSender udpSender;
     private static SystemApp instance = null;
+
+    private final DbController dbController = DbController.getInstance();
+
+    private final HashMap<String, Chat> mapChat= new HashMap<>();
 
     private SystemApp() throws SocketException, UnknownHostException {
         InetAddress address = getMyIp();
@@ -116,35 +125,54 @@ public class SystemApp {
             udpSender.send(message);
             if (type == UDPMessage.TYPEUDPMESSAGE.CHATANSWER && content.equals("RequestAccepted")){
                 TCPSender tcpSender = new TCPSender();
+                addObservers(tcpSender);
                 try {
                     tcpSender.startConnection(address.toString(), 49002);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
                 myUserList.addOpenedChat(address, tcpSender);
+                openChatView(myUserList.getUserByIp(address).getNickname(), false);
             }
             if (type == UDPMessage.TYPEUDPMESSAGE.STOPCHAT){
                 myUserList.removeOpenedChat(address);
+                stopChatView(myUserList.getUserByIp(address).getNickname());
             }
         } catch (IOException ignored) {
             System.out.println("Error while sending message");
         }
     }
 
+    private void addObservers(TCPSender tcpSender) {
+
+        Observer obsDB = (message) -> {
+            try {
+                dbController.insertMessage(message.getContent(), message.getSender().toString(), message.getReceiver().toString(), ((TCPMessage) message).getDate(), ((TCPMessage) message).getType());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        };
+        tcpSender.addObserver(obsDB);
+        Observer obsVue = (message) -> updateChatHistory((TCPMessage) message);
+        tcpSender.addObserver(obsVue);
+        Observer obsPrint = (message) -> System.out.println(" Send : "+message.toString());
+        tcpSender.addObserver(obsPrint);
+    }
+
     /**
      * Treatment of the received message
      * @param message received
      */
-    public void receiveMessage(UDPMessage message) throws UserNotFoundException, UsernameUsedException, SocketException, UnknownHostException {
+    public void receiveMessage(UDPMessage message) throws UserNotFoundException, UsernameUsedException, IOException {
         if (message.getSender().equals(me.getIp())) {
             return;
         }
         switch (message.getType()) {
-            case REQUEST:
+            case REQUEST -> {
                 String messageToSend = "update response from : " + me.getNickname();
                 sendUnicast(messageToSend, message.getSender(), UDPMessage.TYPEUDPMESSAGE.RESPONSE);
-                break;
-            case RESPONSE:
+            }
+            case RESPONSE -> {
                 // get the nickname of the user and add it to the list of users online if it is not already in it
                 String nickname = message.getContent().substring(23);
                 InetAddress address = message.getSender();
@@ -159,16 +187,12 @@ public class SystemApp {
                     }
                     setSomeoneUsername(address, nickname);
                 }
-                break;
-            case DISCONNECTION:
-                myUserList.updateUserStatus(message.getSender(), 0);
-                break;
-            case RENAME:
-                setSomeoneUsername(message.getSender(), message.getContent().substring(18));
-                break;
-            case CHATREQUEST:
-                if (myUserList.userIsInOpenedChats(message.getSender())){
-                    try{
+            }
+            case DISCONNECTION -> myUserList.updateUserStatus(message.getSender(), 0);
+            case RENAME -> setSomeoneUsername(message.getSender(), message.getContent().substring(18));
+            case CHATREQUEST -> {
+                if (myUserList.userIsInOpenedChats(message.getSender())) {
+                    try {
                         udpSender.send(new UDPMessage("chat already opened", me.getIp(), message.getSender(), UDPMessage.TYPEUDPMESSAGE.CHATANSWER, false));
                     } catch (IOException ignored) {
                         // can potentially create a new exception for that
@@ -178,9 +202,9 @@ public class SystemApp {
                     ChatRequest chatRequest = new ChatRequest(senderName);
                     chatRequest.create();
                 }
-                break;
-            case CHATANSWER:
-                if (message.getContent().equals("RequestAccepted")){
+            }
+            case CHATANSWER -> {
+                if (message.getContent().equals("RequestAccepted")) {
                     TCPSender tcpSender = new TCPSender();
                     try {
                         tcpSender.startConnection(message.getSender().toString(), 49002);
@@ -188,13 +212,20 @@ public class SystemApp {
                         throw new RuntimeException(e);
                     }
                     myUserList.addOpenedChat(message.getSender(), tcpSender);
+                    String nicknameOfSender = myUserList.getUserByIp(message.getSender()).getNickname();
+                    openChatView(nicknameOfSender, false);
                 } else {
-                    JOptionPane.showMessageDialog(null, message.getSender()+" refused your chat request.");
+                    JOptionPane.showMessageDialog(null, message.getSender() + " refused your chat request.");
                 }
-                break;
-            case STOPCHAT:
-               myUserList.removeOpenedChat(message.getSender());
-               break;
+            }
+            case STOPCHAT -> {
+                String nicknameOfSender = myUserList.getUserByIp(message.getSender()).getNickname();
+                myUserList.getOpenedChats().get(message.getSender()).stopConnection();
+                myUserList.removeOpenedChat(message.getSender());
+                JOptionPane.showMessageDialog(null, nicknameOfSender + " stopped the chat. \n Mode history only activated.");
+                mapChat.get(nicknameOfSender).updateMode(true);
+                mapChat.remove(nicknameOfSender);
+            }
         }
     }
 
@@ -247,8 +278,25 @@ public class SystemApp {
     public void sendMessage(TCPMessage tcpMessage) {
         try {
             myUserList.getOpenedChats().get(tcpMessage.getReceiver()).sendMessage(tcpMessage);
+            mapChat.get(myUserList.getUserByIp(tcpMessage.getReceiver()).getNickname()).makeChatHistory();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void openChatView(String nickname, boolean historyOnly) throws SocketException, UnknownHostException {
+        Chat chat = new Chat(nickname, historyOnly);
+        chat.create();
+        mapChat.put(nickname, chat);
+    }
+
+    private void stopChatView(String nickname) {
+        mapChat.get(nickname).getFrame().dispose();
+        mapChat.remove(nickname);
+    }
+
+    public void updateChatHistory(TCPMessage message) {
+        String nickname = myUserList.getUserByIp(message.getSender()).getNickname();
+        mapChat.get(nickname).makeChatHistory();
     }
 }

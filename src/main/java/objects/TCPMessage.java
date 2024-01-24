@@ -41,5 +41,15 @@ public class TCPMessage implements Message, Serializable {
     public int getType() {
         return this.type;
     }
+
+    public String toString() {
+        return "TCPMessage{" +
+                "content='" + content + '\'' +
+                ", sender=" + sender +
+                ", receiver=" + receiver +
+                ", date=" + date +
+                ", type=" + type +
+                '}';
+    }
     
 }
