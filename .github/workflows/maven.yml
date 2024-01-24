@@ -39,6 +39,3 @@ jobs:
 
       - name: Run tests
         run: mvn test --file pom.xml
-
-    deploy:
-
